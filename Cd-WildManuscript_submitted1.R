@@ -727,12 +727,15 @@ par(mfrow=c(3,1), mar=c(0,3.3,0,1), oma=c(3,0,1,0), mgp=c(2,1,0), cex=1)
 palette(paste0(mypal,"33"))
 plot(PD~delD, wp.ind, col=factor(Site), pch=16, ylab=expression(paste(Psi[PD]," (MPa)" ))
      , xlab=expression(paste(delta,"D (\u2030)")), xaxt="n")
-modfit <- summary(lmer(PD~delD + (1|Site), wp.ind[which(wp.ind$Site != "PWD"),]))
+# fit lmm
+mod <- lmer(PD~delD + (1|Site), wp.ind)
+# fit across site lm
+modfit <- summary(lm(mPD~mdelD, wp.site[-which(wp.site$Site=="PWD"),]))
 abline(a=modfit$coefficients[1,1], b=modfit$coefficients[2,1], lwd=2, lty=1)
 palette(mypal)
 for (i in levels(wp.ind$Site)[-c(1,3,7,8)]){
   tmp <- wp.ind %>% filter(Site==i) %>% arrange(DBH)
-  fitted <- predict(lm(PD~delD, tmp),newdata=data.frame("delD"=c(min(tmp$delD, na.rm=T), max(tmp$delD, na.rm=T))))
+  fitted <- predict(mod,newdata=data.frame("delD"=c(min(tmp$delD, na.rm=T), max(tmp$delD, na.rm=T)), "Site"=rep(i,2)))
   lines(x=c(min(tmp$delD, na.rm=T), max(tmp$delD, na.rm=T)), y=fitted, col="#55555533", lwd=2)
 }
 points(mPD~mdelD, wp.site, col=factor(Site), pch=17, cex=site.cex)
@@ -742,12 +745,16 @@ mtext("a)", side=3, line=-1, adj=0.05)
 palette(paste0(mypal,"33"))
 plot(MD~delD, wp.ind, col=factor(Site), pch=16, ylab=expression(paste(Psi[MD]," (MPa)" )), xlab=expression(paste(delta,"D (\u2030)")), xaxt="n", yaxt="n", ylim=c(-5.2,-1.3))
 axis(2, at=c(-5,-4,-3,-2))
-modfit <- summary(lmer(MD~delD + (1|Site), wp.ind[which(wp.ind$Site != "PWD"),]))
+#within site lmm
+mod <- lmer(MD~delD+(1|Site), wp.ind)
+# across site lm
+modfit <- summary(lm(mMD~mdelD, wp.site[which(wp.site$Site!="PWD"),]))
 abline(a=modfit$coefficients[1,1], b=modfit$coefficients[2,1], lwd=2, lty=1)
 palette(mypal)
+
 for (i in levels(wp.ind$Site)[-c(1,3,7,8)]){
   tmp <- wp.ind %>% filter(Site==i) %>% arrange(DBH)
-  fitted <- predict(lm(MD~delD, tmp),newdata=data.frame("delD"=c(min(tmp$delD, na.rm=T), max(tmp$delD, na.rm=T))))
+  fitted <- predict(mod,newdata=data.frame("delD"=c(min(tmp$delD, na.rm=T), max(tmp$delD, na.rm=T)),"Site"=rep(i,2)))
   lines(x=c(min(tmp$delD, na.rm=T), max(tmp$delD, na.rm=T)), y=fitted, col="#55555533", lwd=2)
 }
 points(mMD~mdelD, wp.site, col=factor(Site), pch=17, cex=site.cex)
@@ -755,21 +762,25 @@ mtext("b)", side=3, line=-1, adj=0.05)
 
 # Delta Psi
 palette(paste0(mypal,"33"))
-plot(E.drop~delD, wp.ind, col=factor(Site), pch=16, ylab=expression(paste(Delta*Psi," (",Psi[PD]-Psi[MD]," (MPa)")), xlab=expression(paste(delta,"D (\u2030)")), yaxt="n")
-axis(2, at=c(0,1,2,3))
-modfit <- summary(lmer(E.drop~delD + (1|Site), wp.ind[which(wp.ind$Site != "PWD"),]))
+plot(E.drop~delD, wp.ind, col=factor(Site), pch=16, ylab=expression(paste(Delta*Psi," (",Psi[PD]-Psi[MD]," (MPa)")), xlab=expression(paste(delta,"D (\u2030)")), yaxt="n", ylim=c(0,3))
+axis(2, at=c(0,1,2))
+# within-site lmm
+mod <- lmer(E.drop~delD + (1|Site), wp.ind)
+# between site lm
+modfit <- summary(lm(mE.drop~mdelD, wp.site[which(wp.site$Site!="PWD"),]))
+
 abline(a=modfit$coefficients[1,1], b=modfit$coefficients[2,1], lwd=2, lty=1)
 palette(mypal)
 for (i in levels(wp.ind$Site)[-c(1,3,7,8)]){
   tmp <- wp.ind %>% filter(Site==i) %>% arrange(DBH)
-  fitted <- predict(lm(E.drop~delD, tmp),newdata=data.frame("delD"=c(min(tmp$delD, na.rm=T), max(tmp$delD, na.rm=T))))
+  fitted <- predict(mod,newdata=data.frame("delD"=c(min(tmp$delD, na.rm=T), max(tmp$delD, na.rm=T)), "Site"=rep(i,2)))
   lines(x=c(min(tmp$delD, na.rm=T), max(tmp$delD, na.rm=T)), y=fitted, col="#55555533", lwd=2)
 }
 points(mE.drop~mdelD, wp.site, col=factor(Site), pch=17, cex=site.cex)
 mtext(text=expression(paste(delta,"D (\u2030)")),side = 1, line=2)
 mtext("c)", side=3, line=-1, adj=0.05)
 
-if(save.figures==T){quartz.save(file=paste0(results.dir,"/Fig3_WP_delD_v1.pdf"),type = "pdf")}
+if(save.figures==T){quartz.save(file=paste0(results.dir,"/Fig3_WP_delD_v2.pdf"),type = "pdf")}
 #+++++++++++++++++++++++++++++++++++++++++++++++++
 
 
@@ -902,7 +913,7 @@ palette(mypal)
 #   fitted <- predict(lm(perc_maxBAI~PD, tmp),newdata=data.frame("PD"=c(min(tmp$PD, na.rm=T), max(tmp$PD, na.rm=T))))
 #   lines(x=c(min(tmp$PD, na.rm=T), max(tmp$PD, na.rm=T)), y=fitted, col="#55555555", lwd=2)
 # }
-points(mperc_maxBAI~mPD, wp.site, col=factor(Site), pch=17, cex=site.cex)
+points(mperc_maxBAI~mPD, wp.site, col="black", pch=17, cex=site.cex)
 mtext("a)", side=3, line=0, adj=0.05)
 
 palette(paste0(mypal,"33"))
@@ -934,15 +945,18 @@ mtext("b)", side=3, line=0.1, adj=-0.05)
 palette(paste0(mypal,"33"))
 plot(mLength~E.drop, wp.ind, col=factor(Site), pch=16, xlab=expression(paste(Delta*Psi," (MPa)" ))
      , ylab="Stem Length (cm)", log="y")
-modfit <- summary(lmer(logLength~E.drop + (1|Site), wp.ind))
-abline(a=modfit$coefficients[1,1], b=modfit$coefficients[2,1], lwd=2, lty=2)
+# within-site lmm
+mod <- lmer(logLength~E.drop + (1|Site), wp.ind)
+# among site lm
+modfit <- summary(lm(logLength~mE.drop, wp.site))
+#abline(a=modfit$coefficients[1,1], b=modfit$coefficients[2,1], lwd=2, lty=2)
 palette(mypal)
 for (i in levels(wp.ind$Site)[-c(1,3,7,8)]){
   tmp <- wp.ind %>% filter(Site==i) %>% arrange(E.drop)
-  fitted <- predict(lm(mLength~E.drop, tmp),newdata=data.frame("E.drop"=c(min(tmp$E.drop, na.rm=T), max(tmp$E.drop, na.rm=T))))
-  lines(x=c(min(tmp$E.drop, na.rm=T), max(tmp$E.drop, na.rm=T)), y=fitted, col="#55555533", lwd=2)
+  fitted <- predict(mod,newdata=data.frame("E.drop"=c(min(tmp$E.drop, na.rm=T), max(tmp$E.drop, na.rm=T)), "Site"=rep(i,2)))
+  lines(x=c(min(tmp$E.drop, na.rm=T), max(tmp$E.drop, na.rm=T)), y=10^fitted, col="#55555555", lwd=2,lty=2)
 }
-points(mLength~mE.drop, wp.site, col=factor(Site), pch=17, cex=site.cex)
+points(mLength~mE.drop, wp.site, col="black", pch=17, cex=site.cex)
 mtext("c)", side=3, line=0, adj=0.05)
 
 
@@ -956,7 +970,7 @@ palette(mypal)
 points(mLength~tc.tmin, wp.site, col=factor(Site), pch=17, cex=site.cex)
 mtext("d)", side=3, line=0.1, adj=-0.05)
 
-if(save.figures==T){quartz.save(file=paste0(results.dir,"/Fig6_Growth-Climate_v3.pdf"),type = "pdf")}
+if(save.figures==T){quartz.save(file=paste0(results.dir,"/Fig6_Growth-Climate_v4.pdf"),type = "pdf")}
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -1131,15 +1145,15 @@ if(save.figures==T){quartz.save(file=paste0(results.dir,"/Fig7_Trait-Growth_v2nl
 #++++++++++++++++++++++++++++++++++++++++++++++++++++
 ############# . FIG 7 v2 site v tree: Trait~growth responses ############
 
-quartz(width=6.8, height=4.3)
-par(mfcol=c(2,5), mar=c(0,0,0,0), oma=c(3.5,3.5,1,1), mgp=c(2.3,.8,0), cex=.95)
+quartz(width=6.8, height=4.4)
+par(mfcol=c(2,5), mar=c(0,0,0,0), oma=c(3.5,3.5,2,1), mgp=c(2.3,.8,0), cex=.95)
 
 tree.col <- "#55555555"
 ### Al_As
 palette(paste0(mypal,"33"))
 plot(perc_maxBAI~mAl_As, wp.ind, col=factor(Site), pch=16, xlab=expression(paste(A[l]:A[s]," (",cm^2*mm^-2,")" )),
      xaxt="n")
-mtext("% of max BAI", side=2.3, line=2)
+mtext("% of max BAI", side=2, line=2.3)
 mod <- lmer(perc_maxBAI~mAl_As + (1|Site), wp.ind)
 #modfit <- summary(lmer(perc_maxBAI~mAl_As + (1|Site), wp.ind))
 modfit <- summary(lm(mperc_maxBAI~mAl_As, wp.site))
@@ -1155,7 +1169,7 @@ mtext("a)", side=3, line=-1, adj=0.05)
 
 palette(paste0(mypal,"33"))
 plot(mLength~mAl_As, wp.ind, col=factor(Site), pch=16, xlab=expression(paste(A[l]:A[s]," (",cm^2*mm^-2,")" )), ylab="Stem Length (cm)", log="y")
-mtext("Branch Length (cm)", side=2, line=2)
+mtext("Branch Length (cm)", side=2, line=2.3)
 mtext(expression(paste(A[l]:A[s]," (",cm^2*mm^-2,")" )), side=1, line=2.3)
 modfit <- summary(lmer(logLength~mAl_As + (1|Site), wp.ind))
 mod <- lmer(logLength~mAl_As + (1|Site), wp.ind)
@@ -1189,7 +1203,7 @@ mtext("b)", side=3, line=-1, adj=0.05)
 palette(paste0(mypal,"33"))
 plot(mLength~mml_ms, wp.ind, col=factor(Site), pch=16, xlab=expression(paste(A[l]:A[s]," (",cm^2*mm^-2,")" )), ylab="Stem Length (cm)", log="y", yaxt="n")
 #mtext("Branch Length (cm)", side=2, line=2)
-mtext(expression(paste(M[l]:M[s]," (",g*g^-1,")" )), side=1, line=2)
+mtext(expression(paste(M[l]:M[s]," (",g*g^-1,")" )), side=1, line=2.3)
 mod <- lmer(logLength~mml_ms + (1|Site), wp.ind)
 modfit <- summary(lm(logLength~mml_ms , wp.site))
 abline(a=modfit$coefficients[1,1], b=modfit$coefficients[2,1], lwd=2, lty=1)
@@ -1200,6 +1214,7 @@ for (i in levels(wp.ind$Site)[-c(1,3,7,8)]){
   lines(x=c(min(tmp$mml_ms, na.rm=T), max(tmp$mml_ms, na.rm=T)), y=10^fitted, col=tree.col, lwd=2)
 }
 points(mLength~mml_ms, wp.site, col=factor(Site), pch=17, cex=site.cex)
+#legend('topright',pch=c(16,17, NA, NA), lty=c(NA, NA,1,1), lwd=c(NA, NA, 2,2),col=c("gray","black",tree.col,"black"), legend =c("tree","site mean","w/in site","btw site"), bty="n",horiz = T, xpd=NA)
 mtext("g)", side=3, line=-1, adj=0.05)
 
 
@@ -1217,12 +1232,13 @@ palette(mypal)
 # }
 points(mperc_maxBAI~mleafsize, wp.site, col="black", pch=17, cex=site.cex)
 mtext("c)", side=3, line=-1, adj=0.05)
+legend(x=9, y=165,xjust = 0.5, x.intersp=0.2,pch=c(16,17, NA, NA), lty=c(NA, NA,1,1), lwd=c(NA, NA, 2,2),col=c("gray","black",tree.col,"black"), legend =c("tree","site mean  ","w/in site","btw site"), bty="n",horiz = T, xpd=NA)
 
 palette(paste0(mypal,"33"))
 plot(mLength~mleafsize, wp.ind, col=factor(Site), pch=16, xlab=expression(paste(A[l]:A[s]," (",cm^2*mm^-2,")" )), ylab="Stem Length (cm)", log="y", yaxt="n", xaxt="n")
 #mtext("Branch Length (cm)", side=2, line=2)
 axis(1, at=c(4,8,12,16), labels=c(4,8,12,""))
-mtext(expression(paste("Leaf Size (",cm^2,")" )), side=1, line=2)
+mtext(expression(paste("Leaf Size (",cm^2,")" )), side=1, line=2.3)
 
 modfit <- summary(lm(logLength~mleafsize, wp.site))
 abline(a=modfit$coefficients[1,1], b=modfit$coefficients[2,1], lwd=2, lty=1)
@@ -1253,9 +1269,9 @@ points(mperc_maxBAI~mLMA, wp.site, col="black", pch=17, cex=site.cex)
 mtext("d)", side=3, line=-1, adj=0.05)
 
 palette(paste0(mypal,"33"))
-plot(mLength~mLMA, wp.ind, col=factor(Site), pch=16, xlab=expression(paste(A[l]:A[s]," (",cm^2*mm^-2,")" )), ylab="Stem Length (cm)", log="y", yaxt="n")
+plot(mLength~mLMA, wp.ind, col=factor(Site), pch=16,  log="y", yaxt="n")
 #mtext("Branch Length (cm)", side=2, line=2)
-mtext(expression(paste("LMA (",g*cm^-2,")" )), side=1, line=2)
+mtext(expression(paste("LMA (",g*cm^-2,")" )), side=1, line=2.3)
 modfit <- summary(lmer(logLength~mLMA + (1|Site), wp.ind))
 #abline(a=modfit$coefficients[1,1], b=modfit$coefficients[2,1], lwd=2, lty=1)
 palette(mypal)
@@ -1284,10 +1300,10 @@ points(mperc_maxBAI~mLDMC, wp.site, col="black", pch=17, cex=site.cex)
 mtext("e)", side=3, line=-1, adj=0.05)
 
 palette(paste0(mypal,"33"))
-plot(mLength~mLDMC, wp.ind, col=factor(Site), pch=16, xlab=expression(paste(A[l]:A[s]," (",cm^2*mm^-2,")" )), ylab="Stem Length (cm)", log="y", yaxt="n", xaxt="n")
+plot(mLength~mLDMC, wp.ind, col=factor(Site), pch=16, log="y", yaxt="n", xaxt="n")
 #mtext("Branch Length (cm)", side=2, line=2)
 axis(1, at=c(0.45,0.5,0.55, 0.6), labels=c("",0.5,"",0.6))
-mtext(expression(paste("LDMC (",g[dry]*g[wet]^-1,")" )), side=1, line=2)
+mtext(expression(paste("LDMC (",g[dry]*g[wet]^-1,")" )), side=1, line=2.3)
 mod <- lmer(logLength~mLDMC+(1|Site), wp.ind)
 modfit <- summary(lm(logLength~mLDMC, wp.site))
 #abline(a=modfit$coefficients[1,1], b=modfit$coefficients[2,1], lwd=2, lty=2)
@@ -1300,7 +1316,7 @@ for (i in unique(wp.ind$Site[which(wp.ind$mLDMC>0 & wp.ind$perc_maxBAI>0)])){
 points(mLength~mLDMC, wp.site, col="black", pch=17, cex=site.cex)
 mtext("j)", side=3, line=-1, adj=0.05)
 
-if(save.figures==T){quartz.save(file=paste0(results.dir,"/Fig7_Trait-Growth_v3sitevtree.pdf"),type = "pdf")}
+if(save.figures==T){quartz.save(file=paste0(results.dir,"/Fig7_Trait-Growth_v4sitevtree.pdf"),type = "pdf")}
 
 
 
@@ -1351,7 +1367,7 @@ modfit <- summary(mod)
 for (i in unique(wp.ind$Site[which(wp.ind$GPP_mean>0 & wp.ind$perc_maxBAI>0)])){
   tmp <- wp.ind %>% filter(Site==i) %>% arrange(GPP_mean)
   fitted <- predict(mod,newdata=data.frame("GPP_mean"=c(min(tmp$GPP_mean, na.rm=T), max(tmp$GPP_mean, na.rm=T)), "Site"=rep(i,2)))
-  lines(x=c(min(tmp$GPP_mean, na.rm=T), max(tmp$GPP_mean, na.rm=T)), y=fitted, col="#55555555", lwd=2)
+  lines(x=c(min(tmp$GPP_mean, na.rm=T), max(tmp$GPP_mean, na.rm=T)), y=fitted, col="#55555555", lwd=2, lty=2)
 }
 palette(mypal)
 points(mperc_maxBAI~GPP_mean, wp.site
@@ -1370,7 +1386,7 @@ modfit <- summary(mod)
 for (i in unique(wp.ind$Site[which(wp.ind$NPP_mean<0 & wp.ind$perc_maxBAI>0)])){
   tmp <- wp.ind %>% filter(Site==i) %>% arrange(NPP_mean)
   fitted <- predict(mod,newdata=data.frame("NPP_mean"=c(min(tmp$NPP_mean, na.rm=T), max(tmp$NPP_mean, na.rm=T)), "Site"=rep(i,2)))
-  lines(x=c(min(tmp$NPP_mean, na.rm=T), max(tmp$NPP_mean, na.rm=T)), y=fitted, col="#55555588", lwd=2)
+  lines(x=c(min(tmp$NPP_mean, na.rm=T), max(tmp$NPP_mean, na.rm=T)), y=fitted, col="#55555555", lwd=2)
 }
 palette(mypal)
 
