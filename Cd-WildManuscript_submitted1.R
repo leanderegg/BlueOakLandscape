@@ -815,7 +815,7 @@ if(save.figures==T){quartz.save(file=paste0(results.dir,"/Fig4_GasEx_WP_v1.pdf")
 #++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 ########. FIG 5: Trait-climate ####################################
 
-quartz(width=5.8, height=4.5)
+quartz(width=6.2, height=4.5) # width was 5.8
 par(mfrow=c(2,3), mar=c(3,3,1,1), mgp=c(2,1,0), cex=1)
 
 # updated with soil info
