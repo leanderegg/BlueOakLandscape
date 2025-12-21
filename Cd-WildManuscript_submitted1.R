@@ -26,7 +26,7 @@ require(quantreg)
 library(AOI)
 library(climateR)
 library(terra)
-library(khroma)
+
 
 # load in default palette and some opacity versions
 mypal <- c(brewer.pal(n=9, "Set1"), brewer.pal(n=8, "Dark2"))
@@ -54,6 +54,7 @@ se <- function(x){
 save.figures <- T # whether to save figure pdfs
 results.version <- "v240604" # full new version after code update
 results.version <- "v250508" # revision
+results.version <- "v251202" # NP revision 1
 results.dir <- paste0("Results_",results.version)
 if(save.figures == T) { dir.create(results.dir)}
 
@@ -151,7 +152,7 @@ soils <- read.csv("DerivedData/BOINK_soil_data_v1 _revisednames.csv")
 #write.csv(qudo, paste("DerivedData/CA_QUDO_herbariumspecimens_wTerraClimate", results.version,".csv", sep=""))
 #_______________________
 
-# NOT included in Dryad repo for this paper, because just a subset of https://dx.doi.org/10.6078/D16K5W
+# NOT included in Zenodo repo for this paper, because just a subset of https://dx.doi.org/10.6078/D16K5W
 qudo <- read.csv("DerivedData/CA_QUDO_herbariumspecimens_wTerraClimatev240216.csv")
 
 
@@ -194,7 +195,7 @@ wp.ind$Site <- factor(wp.ind$Site)
   # P50_stem = -4.47 MPa
 
 wp.ind$HSM_leaf <-  wp.ind$MD + 3.88
-wp.ind$HSM_stem <- (.92*wp.ind$MD) + 4.47# reduce leaf wp by 8% to estimate branch wp
+wp.ind$HSM_stem <- (.93*wp.ind$MD) + 4.47# reduce leaf wp by 7% to estimate branch wp
 
 
 
@@ -274,6 +275,15 @@ Midday.gasex <- read.csv("DerivedData/SummaryGasEx_fall2018_20190812.csv")
 smr.ind.clean <- read.csv("DerivedData/SMR_GasEx_MorningTimeSeries.csv")
 
 
+###############   END: Load Data ##############################
+
+
+
+
+
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#######   BEGIN: MAIN TEXT ANALYSIS ###################################################
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
 
@@ -330,6 +340,8 @@ if(save.figures==T){quartz.save(file=paste0(results.dir,"/Fig_Map_Clim_v1.pdf"),
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 ########### Analysis: Test environmental predictors of traits/wp/growth ##########
+# sample sizes for Methods
+apply(wp.ind,MARGIN = 2,FUN = function(x){length(which(!is.na(x)))})
 
 
 
@@ -620,25 +632,25 @@ site.cex <- 1.3
 tree.col <- "#55555555"
 
 
-plot(PD~tc.aet, wp.ind, pch=16, col=tree.col
+plot(PD~tc.cwd.2018wy, wp.ind, pch=16, col=tree.col # best variable is tc.aet but ns
      , ylab=expression(paste(Psi[PD], " (MPa)"))
-     , xlab="30yr mean AET (mm)", ylim = c(-5,-0.5))
-points(mPD~tc.aet, wp.site, pch=16, cex=site.cex)
-modfit <- summary(lmer(PD~tc.aet + (1|Site), wp.ind))
+     , xlab="2018 wy CWD (mm)", ylim = c(-5,-0.5))
+points(mPD~tc.cwd.2018wy, wp.site, pch=16, cex=site.cex)
+modfit <- summary(lmer(PD~tc.cwd.2018wy + (1|Site), wp.ind))
 #abline(a=modfit$coefficients[1,1], b=modfit$coefficients[2,1], lwd=2, lty=2)
-mtext(paste("p=", round(modfit$coefficients[2,5],2)),side = 3,line = -1,adj = 0.05)
+mtext(paste("p=", round(modfit$coefficients[2,5],2)),side = 3,line = 0.1,adj = 0.05)
 mtext("a)", side=3, line=0.1, adj=-0.1)
 abline(h=-3.88, col="grey", lty=2)
 abline(h=-4.47, col="black", lty=2)
 
 
-plot(MD~tc.ppt.2018wy, wp.ind, pch=16, col=tree.col
+plot(MD~tc.cwd.2018wy, wp.ind, pch=16, col=tree.col # best variable was tc.ppt.2018wy but ns
      , ylab=expression(paste(Psi[MD]," (MPa)"))
-     , xlab="2018 wy PPT (mm)",  ylim = c(-5,-0.5))
-points(mMD~tc.ppt.2018wy, wp.site, pch=16, cex=site.cex)
-modfit <- summary(lmer(MD~tc.ppt.2018wy + (1|Site), wp.ind))
+     , xlab="2018 wy CWD (mm)",  ylim = c(-5,-0.5))
+points(mMD~tc.cwd.2018wy, wp.site, pch=16, cex=site.cex)
+modfit <- summary(lmer(MD~tc.cwd.2018wy + (1|Site), wp.ind))
 #abline(a=modfit$coefficients[1,1], b=modfit$coefficients[2,1], lwd=2, lty=2)
-mtext(paste("p=", round(modfit$coefficients[2,5],2)),side = 3,line = -1,adj = 0.05)
+mtext(paste("p=", round(modfit$coefficients[2,5],2)),side = 3,line = 0.01,adj = 0.05)
 mtext("b)", side=3, line=0.1, adj=-0.1)
 abline(h=-3.88, col="grey", lty=2)
 abline(h=-4.47, col="black", lty=2)
@@ -648,9 +660,11 @@ plot(E.drop~tc.vpd.2018gs, wp.ind, pch=16, col=tree.col
      , ylab=expression(paste(Delta*Psi," (",Psi[PD]-Psi[MD],", MPa)"))
      , xlab="2018 Apr-Sep VPD (kPa)")
 points(mE.drop~tc.vpd.2018gs, wp.site, pch=16, cex=site.cex)
-modfit <- summary(lmer(E.drop~tc.vpd.2018gs + (1|Site), wp.ind))
+mod <- lmer(E.drop~tc.vpd.2018gs + (1|Site), wp.ind)
+modfit <- summary(mod)
 abline(a=modfit$coefficients[1,1], b=modfit$coefficients[2,1], lwd=2, lty=1)
 mtext(paste("p=", round(modfit$coefficients[2,5],2)),side = 3,line = -1,adj = 0.05)
+mtext(expr(paste(R[marg]^2,"=", !!round(r.squaredGLMM(mod)[[1]],2))), side=3, line=-2.2, adj=0.05)
 mtext("c)", side=3, line=0.1, adj=-0.1)
 
 
@@ -722,7 +736,7 @@ if(save.figures==T){write.csv(isoresults.all, paste0(results.dir,"/Iso_WaterPote
 
 quartz(width=3.2, height=6)
 par(mfrow=c(3,1), mar=c(0,3.3,0,1), oma=c(3,0,1,0), mgp=c(2,1,0), cex=1)
-
+site.cex <- 1.3
 # Predawn
 palette(paste0(mypal,"33"))
 plot(PD~delD, wp.ind, col=factor(Site), pch=16, ylab=expression(paste(Psi[PD]," (MPa)" ))
@@ -815,39 +829,53 @@ if(save.figures==T){quartz.save(file=paste0(results.dir,"/Fig4_GasEx_WP_v1.pdf")
 #++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 ########. FIG 5: Trait-climate ####################################
 
-quartz(width=6.2, height=4.5) # width was 5.8
-par(mfrow=c(2,3), mar=c(3,3,1,1), mgp=c(2,1,0), cex=1)
+quartz(width=6.2, height=4.7) # width was 5.8
+par(mfrow=c(2,3), mar=c(3.5,3,1,1), mgp=c(2,1,0), cex=1)
 
+# a) Al:As
 # updated with soil info
 plot(mAl_As~water.storage100cm, wp.ind, pch=16, col=tree.col
      , ylab=expression(paste(A[leaf]:A[stem]))
      , xlab="1m soil storage (cm)")
 points(mAl_As~water.storage100cm, wp.site, pch=16, cex=site.cex)
-modfit <- summary(lmer(mAl_As~water.storage100cm + (1|Site), wp.ind))
+mod <- lmer(mAl_As~water.storage100cm + (1|Site), wp.ind)
+modfit <- summary(mod)
 # old with only climate
 # plot(mAl_As~tc.tmin.2018wy, wp.ind, pch=16, col=tree.col
 #      , ylab=expression(paste(A[leaf]:A[stem]))
 #      , xlab="Min Temp 2018wy (°C)")
 # points(mAl_As~tc.tmin.2018wy, wp.site, pch=16, cex=site.cex)
 # modfit <- summary(lmer(mAl_As~tc.tmin.2018wy + (1|Site), wp.ind))
+#mtext(paste("p=", round(modfit$coefficients[2,5],2)),side = 3,line = -1,adj = 0.05, cex=.8)
+#mtext(expr(paste(R[marg]^2,"=", !!round(r.squaredGLMM(mod)[[1]],2))), side=3, line=-2, adj=0.05, cex=.8)
 abline(a=modfit$coefficients[1,1], b=modfit$coefficients[2,1], lwd=2, lty=1)
 mtext("a)", side=3, line=0.1, adj=-0.1)
+mtext(expr(paste("p=", !!round(modfit$coefficients[2,5],2),", ", R[marg]^2, "=" , !!round(r.squaredGLMM(mod)[[1]],2))), side=3, line=-.2, cex=0.8)
 
+# b) Ml:Ms
 plot(mml_ms~tc.tmin.2018wy, wp.ind, pch=16, col=tree.col
      , ylab=expression(paste(Mass[leaf]:Mass[stem]))
-     , xlab="Min Temp 2018wy (°C)")
+     , xlab="2018 Min Temp (°C)")
 points(mml_ms~tc.tmin.2018wy, wp.site, pch=16, cex=site.cex)
-modfit <- summary(lmer(mml_ms~tc.tmin.2018wy + (1|Site), wp.ind))
+mod <- lmer(mml_ms~tc.tmin.2018wy + (1|Site), wp.ind)
+modfit <- summary(mod)
+#mtext(paste("p=", round(modfit$coefficients[2,5],2)),side = 3,line = -1,adj = 0.95, cex=.8)
+#mtext(expr(paste(R[marg]^2,"=", !!round(r.squaredGLMM(mod)[[1]],2))), side=3, line=-2, adj=0.95, cex=.8)
 abline(a=modfit$coefficients[1,1], b=modfit$coefficients[2,1], lwd=2, lty=1)
 mtext("b)", side=3, line=0.1, adj=-0.1)
+mtext(expr(paste("p=", !!round(modfit$coefficients[2,5],2),", ", R[marg]^2, "=" , !!round(r.squaredGLMM(mod)[[1]],2))), side=3, line=-.2, cex=0.8)
 
 plot(mleafsize~tc.ppt, wp.ind, pch=16, col=tree.col
      , ylab="mean leaf size (cm2)"
      , xlab="30yr MAP (mm)")
 points(mleafsize~tc.ppt, wp.site, pch=16, cex=site.cex)
-modfit <- summary(lmer(mleafsize~tc.ppt + (1|Site), wp.ind))
+mod <- lmer(mleafsize~tc.ppt + (1|Site), wp.ind)
+modfit <- summary(mod)
+#mtext(paste("p=", round(modfit$coefficients[2,5],2)),side = 3,line = -1,adj = 0.05, cex=.8)
+#mtext(expr(paste(R[marg]^2,"=", !!round(r.squaredGLMM(mod)[[1]],2))), side=3, line=-2.2, adj=0.05, cex=.8)
 abline(a=modfit$coefficients[1,1], b=modfit$coefficients[2,1], lwd=2, lty=1)
 mtext("c)", side=3, line=0.1, adj=-0.1)
+mtext(expr(paste("p=", !!round(modfit$coefficients[2,5],2),", ", R[marg]^2, "=" , !!round(r.squaredGLMM(mod)[[1]],2))), side=3, line=-.2, cex=0.8)
 
 #new soils
 plot(mLMA~PAW, wp.ind, pch=16, col=tree.col
@@ -859,17 +887,22 @@ points(mLMA~PAW, wp.site, pch=16, cex=site.cex)
 #      , ylab="LMA (g/cm2)"
 # , xlab="30yr AET (mm)")
 # points(mLMA~tc.aet, wp.site, pch=16, cex=site.cex)
-modfit <- summary(lmer(mLMA~PAW + (1|Site), wp.ind))
+mod <- lmer(mLMA~PAW + (1|Site), wp.ind)
+modfit <- summary(mod)
+mtext(expr(paste("p=", !!round(modfit$coefficients[2,5],2),", ", R[marg]^2, "=" , !!round(r.squaredGLMM(mod)[[1]],2))), side=3, line=-.2, cex=0.8)
+#mtext(paste("p=", round(modfit$coefficients[2,5],2)),side = 3,line = -1,adj = 0.95, cex=.8)
+#mtext(expr(paste(R[marg]^2,"=", !!round(r.squaredGLMM(mod)[[1]],2))), side=3, line=-2.2, adj=0.95, cex=.8)
 abline(a=modfit$coefficients[1,1], b=modfit$coefficients[2,1], lwd=2, lty=1)
+#mtext(expr(paste("d) p=", !!round(modfit$coefficients[2,5],2),", ", R[marg]^2, "=" , !!round(r.squaredGLMM(mod)[[1]],2))), side=3, line=-.1, adj=-0.1)
 mtext("d)", side=3, line=0.1, adj=-0.1)
 
-plot(mLDMC~tc.tmax.2018sp, wp.ind, pch=16, col=tree.col
+plot(mLDMC~tc.cwd.2018wy, wp.ind, pch=16, col=tree.col
      , ylab="LDMC (g/g)"
-     , xlab="2018 spring Tmax (°C)")
+     , xlab="2018 wy CWD (mm)") # best variable was "2018 spring Tmax (°C)" but ns
 points(mLDMC~tc.tmax.2018sp, wp.site, pch=16, cex=site.cex)
 mtext("e)", side=3, line=0.1, adj=-0.1)
 
-if(save.figures==T){quartz.save(file=paste0(results.dir,"/Fig5_Traits_climatesoil_v2.pdf"),type = "pdf")}
+if(save.figures==T){quartz.save(file=paste0(results.dir,"/Fig5_Traits_climatesoil_v3.pdf"),type = "pdf")}
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
@@ -1416,8 +1449,9 @@ cor.test(wp.ind$psi_leaf_mean_ll,wp.ind$MD)
 
 
 
-#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-############## * Supplemental Figures and Analyses #############################
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#######   BEGIN: SI FIGURES & ANALYSIS ###################################################
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
 #_________________________________________________________________________________
