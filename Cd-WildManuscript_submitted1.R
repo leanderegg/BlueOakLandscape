@@ -265,7 +265,6 @@ wp.site <- wp.ind %>% group_by(Site, SiteName,Lat.dd, Lon.dd, ParentMat, ParentM
 
 
 
-wp.site$maxAl_Al[which(wp.site$maxAl_Al== -Inf)] <- NA
 wp.site$logLength <- log(wp.site$mLength, base=10)
 
 # write out wp.ind dataset
@@ -1067,175 +1066,9 @@ if(save.figures==T){quartz.save(file=paste0(results.dir,"/Fig6_Growth-Climate_v5
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
-#++++++++++++++++++++++++++++++++++++++++++++++++++++
-############# . FIG 7 v1 color: Trait~growth responses ############
-
-quartz(width=6.8, height=4.3)
-par(mfcol=c(2,5), mar=c(0,0,0,0), oma=c(3.5,3.5,1,1), mgp=c(2.3,.8,0), cex=.95)
-
-tree.col <- "#55555533"
-### Al_As
-palette(paste0(mypal,"55"))
-plot(perc_maxBAI~mAl_As, wp.ind, col=factor(Site), pch=16, xlab=expression(paste(A[l]:A[s]," (",cm^2*mm^-2,")" )),
-     xaxt="n")
-mtext("% of max 5yr BAI", side=2.3, line=2)
-modfit <- summary(lmer(perc_maxBAI~mAl_As + (1|Site), wp.ind))
-abline(a=modfit$coefficients[1,1], b=modfit$coefficients[2,1], lwd=2)
-palette(mypal)
-for (i in levels(wp.ind$Site)[-c(1,3,7,8)]){
-  tmp <- wp.ind %>% filter(Site==i) %>% arrange(mAl_As)
-  fitted <- predict(lm(perc_maxBAI~mAl_As, tmp),newdata=data.frame("mAl_As"=c(min(tmp$mAl_As, na.rm=T), max(tmp$mAl_As, na.rm=T))))
-  lines(x=c(min(tmp$mAl_As, na.rm=T), max(tmp$mAl_As, na.rm=T)), y=fitted, col=tree.col, lwd=2)
-}
-points(mperc_maxBAI~mAl_As, wp.site, col=factor(Site), pch=17, cex=site.cex)
-mtext("a)", side=3, line=-1, adj=0.05)
-
-palette(paste0(mypal,"55"))
-plot(mLength~mAl_As, wp.ind, col=factor(Site), pch=16, xlab=expression(paste(A[l]:A[s]," (",cm^2*mm^-2,")" )), ylab="Stem Length (cm)", log="y")
-mtext("1yr Branch Length (cm)", side=2, line=2)
-mtext(expression(paste(A[l]:A[s]," (",cm^2*mm^-2,")" )), side=1, line=2.3)
-modfit <- summary(lmer(logLength~mAl_As + (1|Site), wp.ind))
-abline(a=modfit$coefficients[1,1], b=modfit$coefficients[2,1], lwd=2, lty=2)
-palette(mypal)
-for (i in levels(wp.ind$Site)[-c(1,3,7,8)]){
-  tmp <- wp.ind %>% filter(Site==i) %>% arrange(mAl_As)
-  fitted <- predict(lm(mLength~mAl_As, tmp),newdata=data.frame("mAl_As"=c(min(tmp$mAl_As, na.rm=T), max(tmp$mAl_As, na.rm=T))))
-  lines(x=c(min(tmp$mAl_As, na.rm=T), max(tmp$mAl_As, na.rm=T)), y=fitted, col=tree.col, lwd=2)
-}
-points(mLength~mAl_As, wp.site, col=factor(Site), pch=17, cex=site.cex)
-mtext("f)", side=3, line=-1, adj=0.05)
-
-
-### ml_ms
-palette(paste0(mypal,"55"))
-plot(perc_maxBAI~mml_ms, wp.ind, col=factor(Site), pch=16,
-     xaxt="n", yaxt="n", ylab="")
-modfit <- summary(lmer(perc_maxBAI~mml_ms + (1|Site), wp.ind))
-abline(a=modfit$coefficients[1,1], b=modfit$coefficients[2,1], lwd=2)
-palette(mypal)
-for (i in levels(wp.ind$Site)[-c(1,3,7,8)]){
-  tmp <- wp.ind %>% filter(Site==i) %>% arrange(mml_ms)
-  fitted <- predict(lm(perc_maxBAI~mml_ms, tmp),newdata=data.frame("mml_ms"=c(min(tmp$mml_ms, na.rm=T), max(tmp$mml_ms, na.rm=T))))
-  lines(x=c(min(tmp$mml_ms, na.rm=T), max(tmp$mml_ms, na.rm=T)), y=fitted, col=tree.col, lwd=2)
-}
-points(mperc_maxBAI~mml_ms, wp.site, col=factor(Site), pch=17, cex=site.cex)
-mtext("b)", side=3, line=-1, adj=0.05)
-
-palette(paste0(mypal,"55"))
-plot(mLength~mml_ms, wp.ind, col=factor(Site), pch=16, xlab=expression(paste(A[l]:A[s]," (",cm^2*mm^-2,")" )), ylab="Stem Length (cm)", log="y", yaxt="n")
-#mtext("1yr Branch Length (cm)", side=2, line=2)
-mtext(expression(paste(M[l]:M[s]," (",g*g^-1,")" )), side=1, line=2)
-modfit <- summary(lmer(logLength~mml_ms + (1|Site), wp.ind))
-abline(a=modfit$coefficients[1,1], b=modfit$coefficients[2,1], lwd=2, lty=1)
-palette(mypal)
-for (i in levels(wp.ind$Site)[-c(1,3,7,8)]){
-  tmp <- wp.ind %>% filter(Site==i) %>% arrange(mml_ms)
-  fitted <- predict(lm(mLength~mml_ms, tmp),newdata=data.frame("mml_ms"=c(min(tmp$mml_ms, na.rm=T), max(tmp$mml_ms, na.rm=T))))
-  lines(x=c(min(tmp$mml_ms, na.rm=T), max(tmp$mml_ms, na.rm=T)), y=fitted, col=tree.col, lwd=2)
-}
-points(mLength~mml_ms, wp.site, col=factor(Site), pch=17, cex=site.cex)
-mtext("g)", side=3, line=-1, adj=0.05)
-
-
-### leaf size
-palette(paste0(mypal,"55"))
-plot(perc_maxBAI~mleafsize, wp.ind, col=factor(Site), pch=16,
-     xaxt="n", yaxt="n", ylab="")
-modfit <- summary(lmer(perc_maxBAI~mleafsize + (1|Site), wp.ind))
-#abline(a=modfit$coefficients[1,1], b=modfit$coefficients[2,1], lwd=2)
-palette(mypal)
-# for (i in levels(wp.ind$Site)[-c(1,3,7,8)]){
-#   tmp <- wp.ind %>% filter(Site==i) %>% arrange(mleafsize)
-#   fitted <- predict(lm(perc_maxBAI~mleafsize, tmp),newdata=data.frame("mleafsize"=c(min(tmp$mleafsize, na.rm=T), max(tmp$mleafsize, na.rm=T))))
-#   lines(x=c(min(tmp$mleafsize, na.rm=T), max(tmp$mleafsize, na.rm=T)), y=fitted, col=tree.col, lwd=2)
-# }
-points(mperc_maxBAI~mleafsize, wp.site, col=factor(Site), pch=17, cex=site.cex)
-mtext("c)", side=3, line=-1, adj=0.05)
-
-palette(paste0(mypal,"55"))
-plot(mLength~mleafsize, wp.ind, col=factor(Site), pch=16, xlab=expression(paste(A[l]:A[s]," (",cm^2*mm^-2,")" )), ylab="Stem Length (cm)", log="y", yaxt="n")
-#mtext("1yr Branch Length (cm)", side=2, line=2)
-mtext(expression(paste("Leaf Size (",cm^2,")" )), side=1, line=2)
-modfit <- summary(lmer(logLength~mleafsize + (1|Site), wp.ind))
-#abline(a=modfit$coefficients[1,1], b=modfit$coefficients[2,1], lwd=2, lty=1)
-palette(mypal)
-# for (i in levels(wp.ind$Site)[-c(1,3,7,8)]){
-#   tmp <- wp.ind %>% filter(Site==i) %>% arrange(mleafsize)
-#   fitted <- predict(lm(mLength~mleafsize, tmp),newdata=data.frame("mleafsize"=c(min(tmp$mleafsize, na.rm=T), max(tmp$mleafsize, na.rm=T))))
-#   lines(x=c(min(tmp$mleafsize, na.rm=T), max(tmp$mleafsize, na.rm=T)), y=fitted, col=tree.col, lwd=2)
-# }
-points(mLength~mleafsize, wp.site, col=factor(Site), pch=17, cex=site.cex)
-mtext("h)", side=3, line=-1, adj=0.05)
-
-
-### LMA
-palette(paste0(mypal,"55"))
-plot(perc_maxBAI~mLMA, wp.ind, col=factor(Site), pch=16,
-     xaxt="n", yaxt="n", ylab="")
-modfit <- summary(lmer(perc_maxBAI~mLMA + (1|Site), wp.ind))
-#abline(a=modfit$coefficients[1,1], b=modfit$coefficients[2,1], lwd=2)
-palette(mypal)
-# for (i in levels(wp.ind$Site)[-c(1,3,7,8)]){
-#   tmp <- wp.ind %>% filter(Site==i) %>% arrange(mLMA)
-#   fitted <- predict(lm(perc_maxBAI~mLMA, tmp),newdata=data.frame("mLMA"=c(min(tmp$mLMA, na.rm=T), max(tmp$mLMA, na.rm=T))))
-#   lines(x=c(min(tmp$mLMA, na.rm=T), max(tmp$mLMA, na.rm=T)), y=fitted, col=tree.col, lwd=2)
-# }
-points(mperc_maxBAI~mLMA, wp.site, col=factor(Site), pch=17, cex=site.cex)
-mtext("d)", side=3, line=-1, adj=0.05)
-
-palette(paste0(mypal,"55"))
-plot(mLength~mLMA, wp.ind, col=factor(Site), pch=16, xlab=expression(paste(A[l]:A[s]," (",cm^2*mm^-2,")" )), ylab="Stem Length (cm)", log="y", yaxt="n")
-#mtext("1yr Branch Length (cm)", side=2, line=2)
-mtext(expression(paste("LMA (",g*cm^-2,")" )), side=1, line=2)
-modfit <- summary(lmer(logLength~mLMA + (1|Site), wp.ind))
-#abline(a=modfit$coefficients[1,1], b=modfit$coefficients[2,1], lwd=2, lty=1)
-palette(mypal)
-# for (i in levels(wp.ind$Site)[-c(1,3,7,8)]){
-#   tmp <- wp.ind %>% filter(Site==i) %>% arrange(mLMA)
-#   fitted <- predict(lm(mLength~mLMA, tmp),newdata=data.frame("mLMA"=c(min(tmp$mLMA, na.rm=T), max(tmp$mLMA, na.rm=T))))
-#   lines(x=c(min(tmp$mLMA, na.rm=T), max(tmp$mLMA, na.rm=T)), y=fitted, col=tree.col, lwd=2)
-# }
-points(mLength~mLMA, wp.site, col=factor(Site), pch=17, cex=site.cex)
-mtext("i)", side=3, line=-1, adj=0.05)
-
-
-### LDMC
-palette(paste0(mypal,"55"))
-plot(perc_maxBAI~mLDMC, wp.ind, col=factor(Site), pch=16,
-     xaxt="n", yaxt="n", ylab="")
-modfit <- summary(lmer(perc_maxBAI~mLDMC + (1|Site), wp.ind))
-#abline(a=modfit$coefficients[1,1], b=modfit$coefficients[2,1], lwd=2)
-palette(mypal)
-# for (i in unique(wp.ind$Site[which(wp.ind$mLDMC>0 & wp.ind$perc_maxBAI>0)])) {
-#   tmp <- wp.ind %>% filter(Site==i) %>% arrange(mLDMC)
-#   fitted <- predict(lm(perc_maxBAI~mLDMC, tmp),newdata=data.frame("mLDMC"=c(min(tmp$mLDMC, na.rm=T), max(tmp$mLDMC, na.rm=T))))
-#   lines(x=c(min(tmp$mLDMC, na.rm=T), max(tmp$mLDMC, na.rm=T)), y=fitted, col=tree.col, lwd=2)
-# }
-points(mperc_maxBAI~mLDMC, wp.site, col=factor(Site), pch=17, cex=site.cex)
-mtext("e)", side=3, line=-1, adj=0.05)
-
-palette(paste0(mypal,"55"))
-plot(mLength~mLDMC, wp.ind, col=factor(Site), pch=16, xlab=expression(paste(A[l]:A[s]," (",cm^2*mm^-2,")" )), ylab="Stem Length (cm)", log="y", yaxt="n")
-#mtext("1yr Branch Length (cm)", side=2, line=2)
-mtext(expression(paste("LDMC (",g[dry]*g[wet]^-1,")" )), side=1, line=2)
-modfit <- summary(lmer(logLength~mLDMC + (1|Site), wp.ind))
-abline(a=modfit$coefficients[1,1], b=modfit$coefficients[2,1], lwd=2, lty=2)
-palette(mypal)
-for (i in unique(wp.ind$Site[which(wp.ind$mLDMC>0 & wp.ind$perc_maxBAI>0)])){
-  tmp <- wp.ind %>% filter(Site==i) %>% arrange(mLDMC)
-  fitted <- predict(lm(mLength~mLDMC, tmp),newdata=data.frame("mLDMC"=c(min(tmp$mLDMC, na.rm=T), max(tmp$mLDMC, na.rm=T))))
-  lines(x=c(min(tmp$mLDMC, na.rm=T), max(tmp$mLDMC, na.rm=T)), y=fitted, col=tree.col, lwd=2)
-}
-points(mLength~mLDMC, wp.site, col=factor(Site), pch=17, cex=site.cex)
-mtext("j)", side=3, line=-1, adj=0.05)
-
-if(save.figures==T){quartz.save(file=paste0(results.dir,"/Fig7_Trait-Growth_v2nl.pdf"),type = "pdf")}
-
-
-
 
 #++++++++++++++++++++++++++++++++++++++++++++++++++++
-############# . FIG 7 v2 site v tree: Trait~growth responses ############
+############# . FIG 7: Trait~growth responses ############
 
 quartz(width=6.8, height=4.4)
 par(mfcol=c(2,5), mar=c(0,0,0,0), oma=c(3.5,3.5,2,1), mgp=c(2.3,.8,0), cex=.95)
@@ -1668,8 +1501,23 @@ summary(lmer(perc_maxBAI~logLength + logml_ms + (1|Site), wp.ind)) # still signi
 
 
 
+
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+##### . FIG S2: Al_As doesn't mediate MD ###########
+
+quartz(width=4, height=4)
+
+ggplot(wp.ind, aes(x=tc.cwd.2018wy, y=MD, col=mAl_As, size=mAl_As)) + 
+  geom_point() +
+  labs(color= "A[l]:A[s]", size="A[l]:A[s]") +
+  xlab("2018 wy CWD (mm)") +
+  ylab(expression(paste(Psi[MD]))) +
+  theme_classic()
+  
+if(save.figures==T){quartz.save(file=paste0(results.dir,"/FigS2_MD_CWD-AlAs_v1.pdf"),type = "pdf")}
+
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-##### . FIG S2: Predawn f(DBH) ###########
+##### . FIG S3: Predawn f(DBH) ###########
 
 quartz(width=5.5, height=3)
 par(mar=c(3.3,3.3,1,1), mgp=c(2.2,1,0), mfrow=c(1,2))
@@ -1726,22 +1574,7 @@ points(mdel18O~mDBH, wp.site, col="black", pch=17, cex=site.cex)
 mtext("b)", side=3, line=-1, adj=0.05)
 
 
-if(save.figures==T){quartz.save(file=paste0(results.dir,"/FigS2_WP_DBH_v4.pdf"),type = "pdf")}
-
-#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-##### . FIG S3: Al_As doesn't mediate MD ###########
-
-quartz(width=4, height=4)
-
-ggplot(wp.ind, aes(x=tc.cwd.2018wy, y=MD, col=mAl_As, size=mAl_As)) + 
-  geom_point() +
-  labs(color= "A[l]:A[s]", size="A[l]:A[s]") +
-  xlab("2018 wy CWD (mm)") +
-  ylab(expression(paste(Psi[MD]))) +
-  theme_classic()
-  
-if(save.figures==T){quartz.save(file=paste0(results.dir,"/FigS3_MD_CWD-AlAs_v1.pdf"),type = "pdf")}
-
+if(save.figures==T){quartz.save(file=paste0(results.dir,"/FigS3_WP_DBH_v4.pdf"),type = "pdf")}
 
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
