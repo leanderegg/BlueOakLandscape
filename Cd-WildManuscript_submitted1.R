@@ -208,13 +208,13 @@ wp.ind$HSM_stem <- (.93*wp.ind$MD) + 4.47# reduce leaf wp by 7% to estimate bran
 #######   * Hotter Simulations ###################################################
 #______________________________________________________________________
 
-forcings <- read.csv("DerivedData/HotterSimulations_240627/met_blueOaks_clean.csv")
-maxvpd <- read.csv("DerivedData/HotterSimulations_240627/hotter_demo_output_maxVPD_stdAl.csv")[,-1]
-maxvpd.lowleaf <- read.csv("DerivedData/HotterSimulations_240627/hotter_demo_output_maxVPD_AlLow.csv")[,-1]
-meanvpd <- read.csv("DerivedData/HotterSimulations_240627/hotter_demo_output_meanVPD_stdAl.csv")[,-1]
-meanvpd.lowleaf <- read.csv("DerivedData/HotterSimulations_240627/hotter_demo_output_meanVPD_AlLow.csv")[,-1]
-minvpd <- read.csv("DerivedData/HotterSimulations_240627/hotter_demo_output_minVPD_stdAl.csv")[,-1]
-minvpd.lowleaf <- read.csv("DerivedData/HotterSimulations_240627/hotter_demo_output_minVPD_AlLow.csv")[,-1]
+forcings <- read.csv("DerivedData/HotterSimulations_260128/met_blueOaks_clean.csv")
+maxvpd <- read.csv("DerivedData/HotterSimulations_260128/hotter_demo_output_maxVPD_stdAl.csv")[,-1]
+maxvpd.lowk <- read.csv("DerivedData/HotterSimulations_260128/hotter_demo_output_maxVPD_AlLow.csv")[,-1]
+meanvpd <- read.csv("DerivedData/HotterSimulations_260128/hotter_demo_output_meanVPD_stdAl.csv")[,-1]
+meanvpd.lowk <- read.csv("DerivedData/HotterSimulations_260128/hotter_demo_output_meanVPD_AlLow.csv")[,-1]
+minvpd <- read.csv("DerivedData/HotterSimulations_260128/hotter_demo_output_minVPD_stdAl.csv")[,-1]
+minvpd.lowk <- read.csv("DerivedData/HotterSimulations_260128/hotter_demo_output_minVPD_AlLow.csv")[,-1]
 colnames(maxvpd)[1:6] <- paste(colnames(maxvpd)[1:6], "max", sep="_")
 colnames(meanvpd)[1:6] <- paste(colnames(meanvpd)[1:6], "mean", sep="_")
 colnames(minvpd)[1:6] <- paste(colnames(minvpd)[1:6], "min", sep="_")
