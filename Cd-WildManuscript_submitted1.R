@@ -52,11 +52,12 @@ se <- function(x){
 ### Save Results?
 
 save.figures <- T # whether to save figure pdfs
-results.version <- "v240604" # full new version after code update
-results.version <- "v250508" # revision
-results.version <- "v251202" # NP revision 1
-results.version <- "v260116" # NP revision updated
-results.version <- "v260128" # updated HOTTER sims
+# results.version <- "v240604" # full new version after code update
+# results.version <- "v250508" # revision
+# results.version <- "v251202" # NP revision 1
+# results.version <- "v260116" # NP revision updated
+# results.version <- "v260128" # updated HOTTER sims
+results.version <- "v260404" # final for r2
 results.dir <- paste0("Results_",results.version)
 if(save.figures == T) { dir.create(results.dir)}
 
@@ -67,19 +68,19 @@ if(save.figures == T) { dir.create(results.dir)}
 #######   BEGIN: LOAD DATA ###################################################
 #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+### import climate data downloaded from TerraClimate on 2023.05.12:
+# https://www.climatologylab.org/terraclimate.html
+# Abatzoglou JT, Dobrowski SZ, Parks SA, Hegewisch KC. 2018. TerraClimate, a high-resolution global dataset of monthly climate and climatic water balance from 1958–2015. Scientific Data 5: 170191.
 
-popclim <- read.csv("DerivedData/PopulationClimate_230512.csv")[,-1]
-  # this includes climate data from the Basin Characterisation Model (BCM)
-  # all of Prahlad Papper's phenology sites
 pop.terraclim <- read.csv("DerivedData/Population_TerraClimate_230512.csv")[,-1]
-  # only 15 sites + dropped site from spring (lost access)
+  # only 15 sites + dropped site from spring (lost access because of pot growers)
 
 #______________________________________________________________________
 #######   * Soils data ###################################################
 #______________________________________________________________________
 # Extracted using SoilWeb (NRCS) SSURGO
-
-soils <- read.csv("DerivedData/BOINK_soil_data_v1 _revisednames.csv")
+# https://websoilsurvey.nrcs.usda.gov/app/
+soils <- read.csv("DerivedData/Soil_data_SSURGOv1 _revisednames.csv")
 
 
 
@@ -164,7 +165,7 @@ qudo <- read.csv("DerivedData/CA_QUDO_herbariumspecimens_wTerraClimatev240216.cs
 #______________________________________________________________________
 
 # individual average data, from ~3 measurements per individual for traits and 3-8 measurements for water potentials
-wp.ind <- read.csv("DerivedData/Fall18_WP_traits_growth_isos_230526.csv", row.names = 1)
+wp.ind <- read.csv("DerivedData/Qdouglasii_Fall18_WP_traits_growth_isos_260401.csv", row.names = 1)
 # create log10-transformed variables for things that appear really right skewed
 wp.ind$logAl_As <- log(wp.ind$mAl_As, base=10)
 wp.ind$logml_ms <- log(wp.ind$mml_ms, base=10)
@@ -243,7 +244,7 @@ wp.ind$Site <- factor(wp.ind$Site)
 
 
 ### average to Sites
-wp.site <- wp.ind %>% group_by(Site, SiteName,Lat.dd, Lon.dd, ParentMat, ParentMatcomb,plant_avail, aet, cwd, pet, ppt, aet.2018wy, pet.2018wy, pet.2018gs, cwd.2018wy, ppt.2018wy, ppt.2018sp, ppt.2018sm, tmx.2018wy, tmx.2018gs, tmn.2018wy, str.2018wy, soil_depth,
+wp.site <- wp.ind %>% group_by(Site, SiteName,Lat.dd, Lon.dd, 
                                          tc.aet,tc.cwd, tc.cwd_gs,tc.pet, tc.ppt, tc.soil_mean, tc.soil_min, tc.srad, tc.tmax, tc.tmin, tc.vpd_max, tc.vpd_spr, tc.vpd_gs, 
                                          tc.aet.2018ds, tc.aet.2018gs, tc.aet.2018wy, tc.cwd.2018ds, tc.cwd.2018gs, tc.cwd.2018wy, tc.ppt.2018ds, tc.ppt.2018gs, tc.ppt.2018wy, tc.pet.2018ds, tc.pet.2018gs, tc.pet.2018wy,
                                          tc.soil_mean.2018wy, tc.soil_min.2018wy, tc.soil_mean.2018ds, tc.soil_min.2018ds, tc.soil_mean.2018gs, tc.soil_min.2018gs, tc.tmax.2018wy, tc.tmax.2018sp, tc.tmin.2018wy, tc.tmin.2018sp, tc.vpd_max.2018wy, tc.vpd.2018sp, tc.vpd.2018gs,
@@ -257,8 +258,6 @@ wp.site <- wp.ind %>% group_by(Site, SiteName,Lat.dd, Lon.dd, ParentMat, ParentM
             mdelD.resid=mean(delD.resid,na.rm=T), sddelD.resid = sd(delD.resid, na.rm=T), sedelD.resid = se(delD.resid),
             mdel18O.resid=mean(del18O.resid,na.rm=T), sddel18O.resid = sd(del18O.resid, na.rm=T), sedel18O.resid = se(del18O),
             mlc_excess=mean(lc_excess,na.rm=T), sdlc_excess = sd(lc_excess, na.rm=T), selc_excess = se(lc_excess),
-            mwinter_excessD=mean(winter_excessD,na.rm=T), sdwinter_excessD = sd(winter_excessD, na.rm=T), sewinter_excessD = se(winter_excessD),
-            mwinter_excess18O=mean(winter_excess18O,na.rm=T), sdwinter_excess18O = sd(winter_excess18O, na.rm=T), sewinterexcess18O = se(winter_excess18O),
             mmaxAl_As=mean(maxAl_As, na.rm=T),sdmaxAl_As = sd(maxAl_As, na.rm=T), semaxAl_As = se(maxAl_As), maxAl_Al=max(maxAl_As, na.rm=T),
             sdmAl_As = sd(mAl_As, na.rm=T), semAl_As = se(mAl_As), mAl_As=mean(mAl_As, na.rm=T),
             sdmml_ms = sd(mml_ms, na.rm=T), semml_ms = se(mml_ms), mml_ms=mean(mml_ms, na.rm=T),
@@ -289,7 +288,7 @@ Midday.gasex <- read.csv("DerivedData/SummaryGasEx_fall2018_20190812.csv")
 
 
 # load in the morning time series from Santa Maria
-smr.ind.clean <- read.csv("DerivedData/SMR_GasEx_MorningTimeSeries.csv")
+smr.ind.clean <- read.csv("DerivedData/SMR_GasEx_MorningTimeSeries.csv", row.names = 1)
 
 
 ###############   END: Load Data ##############################
@@ -813,7 +812,7 @@ modfit <- summary(mod)
 # across site lm
 modlm <- lm(mMD~mdel18O, wp.site[which(wp.site$Site!="PWD"),])
 modfitlm <- summary(modlm)
-abline(a=modfitlm$coefficients[1,1], b=modfitlm$coefficients[2,1], lwd=2, lty=1)
+abline(a=modfitlm$coefficients[1,1], b=modfitlm$coefficients[2,1], lwd=2, lty=2)
 palette(mypal)
 
 for (i in levels(wp.ind$Site)[-c(1,3,7,8)]){
@@ -957,7 +956,7 @@ mtext("d)", side=3, line=0.1, adj=-0.1)
 plot(mLDMC~tc.cwd.2018wy, wp.ind, pch=16, col=tree.col
      , ylab="LDMC (g/g)"
      , xlab="2018 wy CWD (mm)") # best variable was "2018 spring Tmax (°C)" but ns
-points(mLDMC~tc.tmax.2018sp, wp.site, pch=16, cex=site.cex)
+points(mLDMC~tc.cwd.2018wy, wp.site, pch=16, cex=site.cex)
 mtext("e)", side=3, line=0.1, adj=-0.1)
 
 if(save.figures==T){quartz.save(file=paste0(results.dir,"/Fig5_Traits_climatesoil_v3.pdf"),type = "pdf")}
@@ -1094,7 +1093,7 @@ modfit <- summary(mod)
 #modfit <- summary(lmer(perc_maxBAI~mAl_As + (1|Site), wp.ind))
 modlm <- lm(mperc_maxBAI~mAl_As, wp.site)
 modfitlm <- summary(modlm)
-abline(a=modfitlm$coefficients[1,1], b=modfitlm$coefficients[2,1], lwd=2)
+abline(a=modfitlm$coefficients[1,1], b=modfitlm$coefficients[2,1], lwd=2, lty=2)
 mtext(expr(paste("p=", !!round(modfit$coefficients[2,5],2),", ", R[marg]^2, "=" , !!round(r.squaredGLMM(mod)[[1]],2))), side=3, line=-2, cex=0.7, col="darkgray")
 mtext(expr(paste("p=", !!round(modfitlm$coefficients[2,4],2),", ", R^2, "=" , !!round(modfitlm$r.squared,2))), side=3, line=-1.1, cex=0.7, adj=.6)
 
@@ -1119,8 +1118,8 @@ modfit <- summary(mod)
 modlm <- lm(logLength~mAl_As, wp.site)
 modfitlm <- summary(modlm)
 #abline(a=modfitlm$coefficients[1,1], b=modfitlm$coefficients[2,1], lwd=2)
-#mtext(expr(paste("p=", !!round(modfit$coefficients[2,5],2),", ", R[marg]^2, "=" , !!round(r.squaredGLMM(mod)[[1]],2))), side=3, line=-2, cex=0.7, col="darkgray")
-mtext(expr(paste("p=", !!round(modfitlm$coefficients[2,4],2),", ", R^2, "=" , !!round(modfitlm$r.squared,2))), side=3, line=-1.1, cex=0.7)
+mtext(expr(paste("p=", !!round(modfit$coefficients[2,5],2),", ", R[marg]^2, "=" , !!round(r.squaredGLMM(mod)[[1]],2))), side=3, line=-2, cex=0.7, col="darkgray")
+#mtext(expr(paste("p=", !!round(modfitlm$coefficients[2,4],2),", ", R^2, "=" , !!round(modfitlm$r.squared,2))), side=3, line=-1.1, cex=0.7)
 
 palette(mypal)
 for (i in levels(wp.ind$Site)[-c(1,3,7,8)]){
@@ -1141,7 +1140,7 @@ modfit <- summary(mod)
 #modfit <- summary(lmer(perc_maxBAI~mAl_As + (1|Site), wp.ind))
 modlm <- lm(mperc_maxBAI~mml_ms, wp.site)
 modfitlm <- summary(modlm)
-abline(a=modfitlm$coefficients[1,1], b=modfitlm$coefficients[2,1], lwd=2)
+abline(a=modfitlm$coefficients[1,1], b=modfitlm$coefficients[2,1], lwd=2, lty=2)
 mtext(expr(paste("p=", !!round(modfit$coefficients[2,5],2),", ", R[marg]^2, "=" , !!round(r.squaredGLMM(mod)[[1]],2))), side=3, line=-2, cex=0.7, col="darkgray")
 mtext(expr(paste("p=", !!round(modfitlm$coefficients[2,4],2),", ", R^2, "=" , !!round(modfitlm$r.squared,2))), side=3, line=-1.1, cex=0.7, adj=0.6)
 
@@ -1204,7 +1203,7 @@ mtext(expression(paste("Leaf Size (",cm^2,")" )), side=1, line=2.3)
 
 modlm <- lm(logLength~mleafsize, wp.site)
 modfitlm <- summary(modlm)
-abline(a=modfitlm$coefficients[1,1], b=modfitlm$coefficients[2,1], lwd=2)
+abline(a=modfitlm$coefficients[1,1], b=modfitlm$coefficients[2,1], lwd=2, lty=2)
 #mtext(expr(paste("p=", !!round(modfit$coefficients[2,5],2),", ", R[marg]^2, "=" , !!round(r.squaredGLMM(mod)[[1]],2))), side=3, line=-1.8, cex=0.7, col="darkgray")
 mtext(expr(paste("p=", !!round(modfitlm$coefficients[2,4],2),", ", R^2, "=" , !!round(modfitlm$r.squared,2))), side=3, line=-1.1, cex=0.7, adj=.6)
 
@@ -1371,6 +1370,8 @@ plot(perc_maxBAI~GPP_mean, wp.ind, col=factor(Site), pch=16
 # arrows(x0 = wp.ind$GPP_min, x1=wp.ind$GPP_max, y0=wp.ind$perc_maxBAI, col=factor(wp.ind$Site), length = 0, lwd=2)
 mod <- lmer(perc_maxBAI~GPP_mean + (1|Site), wp.ind)
 modfit <- summary(mod)
+# modlm <- lm(mperc_maxBAI~GPP_mean, wp.site)
+# modfitlm <- summary(modlm)
 mtext(expr(paste("p=", !!round(modfit$coefficients[2,5],3),", ", R[marg]^2, "=" , !!round(r.squaredGLMM(mod)[[1]],2))), side=3, line=-1.2, adj=.85, cex=0.7, col="darkgray")
 #abline(a=modfit$coefficients[1,1], b=modfit$coefficients[2,1], lwd=2, lty=2)
 for (i in unique(wp.ind$Site[which(wp.ind$GPP_mean>0 & wp.ind$perc_maxBAI>0)])){
@@ -1410,10 +1411,7 @@ mtext("d)", side=3, line=-1, adj=0.05)
 if(save.figures==T){quartz.save(file=paste0(results.dir,"/Fig8_HotterSims_v5.pdf"),type = "pdf")}
 
 
-# Compare correlations of full and LL simulations
-  # but need to remove 'runaway' trees in full sims for apples-to-apples comparison
-cor.test(wp.ind$psi_leaf_mean[which(wp.ind$PLC_mean<99)],wp.ind$MD[which(wp.ind$PLC_mean<99)])
-cor.test(wp.ind$psi_leaf_mean,wp.ind$MD)
+
 
 
 
@@ -1428,79 +1426,33 @@ cor.test(wp.ind$psi_leaf_mean,wp.ind$MD)
 #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
-#_________________________________________________________________________________
-########### . Length Correction Analysis Supplemental ###########
-### branch level correlations
-# chars <- c("Length","Leaf_num","Al_As","LDMC","LMA","leafsize","ml_ms")
-# Mypairs(branch.traits[,chars])
-
-# quick 
-branch.traits$ml_ms.resid <- NA
-branch.traits$ml_ms.resid[which(branch.traits$ml_ms>0)] <- resid(lm(ml_ms~log(Length,10), branch.traits)) #make a length corrected version
-
-
-# Remove effect of branch length on Al:As by pulling out residuals
-# note: it's a log-log relationship, so need to back transform prediction and calculate raw residuals
-# Version with unlogged Al_As
-branch.traits$Al_As.resid <- NA
-branch.traits$Al_As.resid[which(branch.traits$Al_As>0)] <- resid(lm(Al_As~log(Length,10), branch.traits)) #make a length corrected version
-# correct version with transformed predictions of log(Al_As)
-al.aspreds <- predict(lm(log(Al_As)~log(Length), branch.traits))
-al.aspreds.raw <- exp(al.aspreds)
-plot(Al_As~log(Length), branch.traits)
-points(al.aspreds.raw~log(branch.traits$Length[which(branch.traits$Al_As>0)]), col="red", pch=".")
-branch.traits$Al_As.resid2 <- NA
-branch.traits$Al_As.resid2[which(branch.traits$Al_As>0)] <- branch.traits$Al_As[which(branch.traits$Al_As>0)] - al.aspreds.raw #make a length corrected version
-#plot(Al_As.resid2~Al_As.resid, branch.traits)
-# turns out, they're almost identical
-
-# Remove effect of branch length on Ml:Ms
-ml_mspreds <- predict(lm(log(ml_ms)~log(Length), branch.traits))
-ml_mspreds.raw <- exp(ml_mspreds)
-plot(ml_ms~log(Length), branch.traits)
-points(ml_mspreds.raw~log(branch.traits$Length[which(branch.traits$ml_ms>0)]), col="red", pch=".")
-branch.traits$ml_ms.resid2 <- NA
-branch.traits$ml_ms.resid2[which(branch.traits$ml_ms>0)] <- branch.traits$ml_ms[which(branch.traits$ml_ms>0)] - ml_mspreds.raw #make a length corrected version
-
-# get these branch-level corrected values into the tree-average df
-resid.df <- branch.traits %>% group_by(pop, tree) %>% summarise(ml_ms.resid = mean(ml_ms.resid2, na.rm=T), Al_As.resid=mean(Al_As.resid2, na.rm=T))
-test <- left_join(wp.ind, resid.df, by=c("Site"="pop","Tree"="tree"))
-
-
-# Al:As still negatively related to BAI when controlling for branch length
-summary(lmer(perc_maxBAI~Al_As.resid + (1|Site), test)) # p=0.009
-summary(lmer(perc_maxBAI~mAl_As + logLength + (1|Site), test)) #p= 0.009 or 0.01 (logLength)
-
-
-summary(lmer(perc_maxBAI~ml_ms.resid + (1|Site), test)) # p=0.025 still significant and negative
-summary(lmer(perc_maxBAI~logLength + mml_ms + (1|Site), wp.ind)) # no longer significant
-summary(lmer(perc_maxBAI~logLength + logml_ms + (1|Site), wp.ind)) # still significant and negative
-
-# Takehome point: Al:As and Ml:Ms are still negatively correlated with % max 5yr BAI after controlling for length
-
-# plot(perc_maxBAI~ml_ms.resid, test, pch=16, col=factor(Site))
-# modfit <- summary(lmer(perc_maxBAI~ml_ms.resid + (1|Site), test))
-# abline(a=modfit$coefficients[1,1], b=modfit$coefficients[2,1], lwd=2, lty=1)
-# 
-# 
-# plot(perc_maxBAI~Al_As.resid, test, pch=16, col=factor(Site))
-# modfit <- summary(lmer(perc_maxBAI~Al_As.resid + (1|Site), test))
-# abline(a=modfit$coefficients[1,1], b=modfit$coefficients[2,1], lwd=2, lty=1)
-# palette(mypal)
-# for (i in unique(test$Site[which(test$Al_As.resid>0 & test$perc_maxBAI>0)])){
-#   tmp <- test %>% filter(Site==i) %>% arrange(Al_As.resid)
-#   fitted <- predict(lm(perc_maxBAI~Al_As.resid, tmp),newdata=data.frame("Al_As.resid"=c(min(tmp$Al_As.resid, na.rm=T), max(tmp$Al_As.resid, na.rm=T))))
-#   lines(x=c(min(tmp$Al_As.resid, na.rm=T), max(tmp$Al_As.resid, na.rm=T)), y=fitted, col="#55555555", lwd=2)
-# }
-# #points(mLength~mLDMC, wp.site, col=factor(Site), pch=17, cex=site.cex)
-
-
-
-
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 ##### . FIG S1: size-standardizing BAI ###########
 
+# read in BAI and DBH data for all trees:
+wildgrowth <- read.csv("DerivedData/WildGrowth_Oct2018_20230428.csv",row.names=1)
+# calculate Basal Area Increment from 5yr radial growth and tree DBH
+wildgrowth$BAI_cm2 <- (wildgrowth$DBH_cm/2)^2 * pi - (wildgrowth$DBH_cm/2 - wildgrowth$growth5yr_mm/10)^2 * pi
+# area of whole tree - area of tree 5 years ago
 
+mypal <- c(brewer.pal(n=9, "Set1"), brewer.pal(n=8, "Dark2"))
+palette(mypal)
+quartz(width=4, height=4)
+plot(BAI_cm2~DBH_cm, wildgrowth,type="n",xlab="DBH (cm)", ylab="Basal Area Increment (cm2)")
+points(BAI_cm2~DBH_cm, wildgrowth, col=factor(Site), pch=16)
+# 90th quantile
+abline(quantreg::rq(BAI_cm2~DBH_cm, wildgrowth,tau=.9),col="blue")
+abline(quantreg::rq(BAI_cm2~DBH_cm, wildgrowth,tau=.5),col="darkgray", lwd=2)
+# # other range of quantiles
+# taus <- c(.05,.1,.25,0.5,.75,.90,.95)
+# 
+# for( i in 1:length(taus)){
+#   abline(rq(BAI_cm2~DBH_cm, wildgrowth,tau=taus[i]),col="gray")
+# }
+legend('topleft', legend = c("Mean", "90th %-ile"), lwd=c(2,1), col=c("darkgray","blue"))
+if(save.figures==T){
+  quartz.save(file=paste0(results.dir,"/FigS1_BAIDBH_v1.pdf"), type="pdf")
+}
 
 
 
@@ -1801,61 +1753,63 @@ if(save.figures==T){quartz.save(file=paste0(results.dir,"/FigS6_WP_Traits_corrs_
 
 
 
-#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-######. Fig S7: PLC ~ MD for Leaf Area comparison #########
-
-
-quartz(width=6, height=3.1)
-par(mfrow=c(1,2),mar=c(3,3.5,1.5,1), mgp=c(2,1,0))
-
-# a) PLC pretty reasonable based on MDs - true leaf area
-palette(mypal)
-plot(PLC_mean~MD, wp.ind, col=factor(Site), pch=16
-     ,xlab=expression(paste("Observed ",Psi[MD]," (MPa)"))
-     ,ylab= "Simulated PLC (%)" 
-     ,ylim= c(0,100))
-palette(paste0(mypal,"77"))
-arrows(y0 = 100 - 100*wp.ind$K_frac_min, y1=100- 100*wp.ind$K_frac_max, x0=wp.ind$MD, col=factor(wp.ind$Site), length = 0, lwd=2)
-mtext("a) High Kmax", side=3, line=0, adj=0.05)
-abline(v=-3.88, col="grey", lty=2)
-abline(v=-4.47, col="black", lty=2)
-#points(PLC_mean_ll~MD, wp.ind, col=factor(Site))
-
-# b) PLC as f(observed MD) Low Leaf Area
-palette(mypal)
-plot(PLC_mean_lk~MD, wp.ind, col=factor(Site), pch=16
-     ,xlab=expression(paste("Observed ",Psi[MD]," (MPa)"))
-     ,ylab= "Simulated PLC (%)" 
-     ,ylim=c(0,100))
-palette(paste0(mypal,"77"))
-arrows(y0 = 100 - 100*wp.ind$K_frac_min_lk, y1=100- 100*wp.ind$K_frac_max_lk, x0=wp.ind$MD, col=factor(wp.ind$Site), length = 0, lwd=2)
-mtext("b) Low Kmax", side=3, line=0, adj=0.05)
-abline(v=-3.88, col="grey", lty=2)
-abline(v=-4.47, col="black", lty=2)
-
-
-if(save.figures==T){quartz.save(file=paste0(results.dir,"/FigS7_HotterSimPrognostic_v3.pdf"),type = "pdf")}
 
 
 
+#++++++++++++++++++++++++++++++++++++++++++++++++++
+#####. Fig S7: HOTTER NPP~Leaf Area with VPD #######
+quartz(width=7, height=3)
+par(mfrow=c(1,3), mar=c(3.1,3.1,1,1), mgp=c(2,1,0), cex=1)
+
+# a) Max VPD
+palette(paste0(mypal,"99"))
+plot(NPP_max~al_true, wp.ind, col=factor(Site), pch=16
+     , ylab="Simulated NPP (gC/day)"
+     , xlab="Total Tree Leaf Area (m2)", ylim=c(-250,175)
+)
+points(NPP_max~al_true, wp.ind[which(wp.ind$NPP_max<0),])
+abline(a=1,b=0, col="darkgray")
+mtext("a) Max VPD", side=3, line=0.1, adj=-0.1)
+# fit lm
+modlm <- lm(NPP_max~al_true, wp.ind[which(wp.ind$NPP_max<0),])
+modfitlm <- summary(modlm)
+abline(a=modfitlm$coefficients[1,1], b=modfitlm$coefficients[2,1], lwd=2, lty=1)
+mtext(expr(paste("p=", !!round(modfitlm$coefficients[2,4],2),", ", R^2, "=" , !!round(modfitlm$r.squared,2))), side=3, line=-1.1, cex=0.7, adj=.9)
 
 
-# 
-# # bnew) PLC  based on PDs
-# palette(mypal)
-# plot(I(100-100*K_frac_mean)~PD, wp.ind, col=factor(Site), pch=16
-#      ,xlab=expression(paste("Observed ",Psi[PD]," (MPa)"))
-#      ,ylab= "Simulated PLC (%)" )
-# palette(paste0(mypal,"77"))
-# arrows(y0 = 100 - 100*wp.ind$K_frac_min, y1=100- 100*wp.ind$K_frac_max, x0=wp.ind$PD, col=factor(wp.ind$Site), length = 0, lwd=2)
-# mtext("b)", side=3, line=0, adj=0.05)
-# abline(v=-3.88, col="grey", lty=2)
-# abline(v=-4.47, col="black", lty=2)
-# 
-# points(I(100-100*K_frac_mean_ll)~PD, wp.ind, col=factor(Site), pch=1
-#      ,xlab=expression(paste("Observed ",Psi[MD]," (MPa)"))
-#      ,ylab= "Simulated PLC (%)" )
+# Panel b) mean VPD
+plot(NPP_mean~al_true, wp.ind, col=factor(Site), pch=16
+     , ylab="Simulated NPP (gC/day)"
+     , xlab="Total Tree Leaf Area (m2)"
+     , ylim=c(-250,175)
+)
+points(NPP_mean~al_true, wp.ind[which(wp.ind$NPP_mean<0),])
+abline(a=1,b=0, col="darkgray")
+mtext("b) Mean VPD", side=3, line=0.1, adj=-0.1)
+# fit lm
+modlm <- lm(NPP_mean~al_true, wp.ind[which(wp.ind$NPP_mean<0),])
+modfitlm <- summary(modlm)
+abline(a=modfitlm$coefficients[1,1], b=modfitlm$coefficients[2,1], lwd=2, lty=1)
+mtext(expr(paste("p=", !!round(modfitlm$coefficients[2,4],2),", ", R^2, "=" , !!round(modfitlm$r.squared,2))), side=3, line=-1.1, cex=0.7, adj=.9)
 
+
+# Panel c) min VPD
+plot(NPP_min~al_true, wp.ind, col=factor(Site), pch=16
+     , ylab="Simulated NPP (gC/day)"
+     , xlab="Total Tree Leaf Area (m2)"
+     , ylim=c(-250,175)
+)
+points(NPP_min~al_true, wp.ind[which(wp.ind$NPP_min<0),])
+abline(a=1,b=0)
+
+mtext("c) Min VPD", side=3, line=0.1, adj=-0.1)
+# fit lm
+modlm <- lm(NPP_min~al_true, wp.ind[which(wp.ind$NPP_min>0),])
+modfitlm <- summary(modlm)
+abline(a=modfitlm$coefficients[1,1], b=modfitlm$coefficients[2,1], lwd=2, lty=2)
+mtext(expr(paste("p=", !!round(modfitlm$coefficients[2,4],2),", ", R^2, "=" , !!round(modfitlm$r.squared,2))), side=1, line=-1.1, cex=0.7, adj=.9)
+
+if(save.figures==T){quartz.save(file=paste0(results.dir,"/FigS7_HotterSim_LeafAreaSensitivity_v1.pdf"),type = "pdf")}
 
 
 
@@ -1954,7 +1908,198 @@ if(save.figures==T){quartz.save(file=paste0(results.dir,"/FigS8_HotterSimsBrGrow
 
 
 
-# ## looking at min VPD
+
+
+
+
+
+
+
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#####. FIG S9: Dual Isotope Plot ####################
+
+quartz(width=4, height=4)
+palette(mypal)
+par(mgp=c(2.5,1,0))
+plot(delD~del18O, wp.ind, col=Site, pch=16,
+     ylab= expression(paste(delta*D[xylem]," (\u2030)")),
+     xlab= expression(paste(delta^18 *O[xylem]," (\u2030)")))
+abline(a=10, b=8)
+
+if(save.figures==T){quartz.save(file=paste0(results.dir,"/FigS9_DualIsoPlot_v1.pdf"),type = "pdf")}
+
+
+
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+########. FIG S10: Controls on Al_As ####################################
+
+quartz(width=3.5, height=3.5)
+ggplot(branch.traits, aes(x=log(leafsize), y=log(Al_As), col=log(Length))) + geom_point() + theme_classic()
+
+if(save.figures==T){quartz.save(file=paste0(results.dir,"/FigS12_AlAs_lengthleafsize_v1.pdf"),type = "pdf")}
+
+
+mod <- lmer(log(Al_As)~log(leafsize)+log(Length)+(1|pop/tree), branch.traits)
+summary(mod)
+r.squaredGLMM(mod) # Marginal R2 = 0.19
+
+
+
+
+
+#_________________________________________________________________________________
+########### . Length Correction Analysis Supplemental ###########
+### branch level correlations
+# chars <- c("Length","Leaf_num","Al_As","LDMC","LMA","leafsize","ml_ms")
+# Mypairs(branch.traits[,chars])
+
+# quick 
+branch.traits$ml_ms.resid <- NA
+branch.traits$ml_ms.resid[which(branch.traits$ml_ms>0)] <- resid(lm(ml_ms~log(Length,10), branch.traits)) #make a length corrected version
+
+
+# Remove effect of branch length on Al:As by pulling out residuals
+# note: it's a log-log relationship, so need to back transform prediction and calculate raw residuals
+# Version with unlogged Al_As
+branch.traits$Al_As.resid <- NA
+branch.traits$Al_As.resid[which(branch.traits$Al_As>0)] <- resid(lm(Al_As~log(Length,10), branch.traits)) #make a length corrected version
+# correct version with transformed predictions of log(Al_As)
+al.aspreds <- predict(lm(log(Al_As)~log(Length), branch.traits))
+al.aspreds.raw <- exp(al.aspreds)
+plot(Al_As~log(Length), branch.traits)
+points(al.aspreds.raw~log(branch.traits$Length[which(branch.traits$Al_As>0)]), col="red", pch=".")
+branch.traits$Al_As.resid2 <- NA
+branch.traits$Al_As.resid2[which(branch.traits$Al_As>0)] <- branch.traits$Al_As[which(branch.traits$Al_As>0)] - al.aspreds.raw #make a length corrected version
+#plot(Al_As.resid2~Al_As.resid, branch.traits)
+# turns out, they're almost identical
+
+# Remove effect of branch length on Ml:Ms
+ml_mspreds <- predict(lm(log(ml_ms)~log(Length), branch.traits))
+ml_mspreds.raw <- exp(ml_mspreds)
+plot(ml_ms~log(Length), branch.traits)
+points(ml_mspreds.raw~log(branch.traits$Length[which(branch.traits$ml_ms>0)]), col="red", pch=".")
+branch.traits$ml_ms.resid2 <- NA
+branch.traits$ml_ms.resid2[which(branch.traits$ml_ms>0)] <- branch.traits$ml_ms[which(branch.traits$ml_ms>0)] - ml_mspreds.raw #make a length corrected version
+
+# get these branch-level corrected values into the tree-average df
+resid.df <- branch.traits %>% group_by(pop, tree) %>% summarise(ml_ms.resid = mean(ml_ms.resid2, na.rm=T), Al_As.resid=mean(Al_As.resid2, na.rm=T))
+test <- left_join(wp.ind, resid.df, by=c("Site"="pop","Tree"="tree"))
+
+
+# Al:As still negatively related to BAI when controlling for branch length
+summary(lmer(perc_maxBAI~Al_As.resid + (1|Site), test)) # p=0.009
+summary(lmer(perc_maxBAI~mAl_As + logLength + (1|Site), test)) #p= 0.009 or 0.01 (logLength)
+
+
+summary(lmer(perc_maxBAI~ml_ms.resid + (1|Site), test)) # p=0.025 still significant and negative
+summary(lmer(perc_maxBAI~logLength + mml_ms + (1|Site), wp.ind)) # no longer significant
+summary(lmer(perc_maxBAI~logLength + logml_ms + (1|Site), wp.ind)) # still significant and negative
+
+# Takehome point: Al:As and Ml:Ms are still negatively correlated with % max 5yr BAI after controlling for length
+
+# plot(perc_maxBAI~ml_ms.resid, test, pch=16, col=factor(Site))
+# modfit <- summary(lmer(perc_maxBAI~ml_ms.resid + (1|Site), test))
+# abline(a=modfit$coefficients[1,1], b=modfit$coefficients[2,1], lwd=2, lty=1)
+# 
+# 
+# plot(perc_maxBAI~Al_As.resid, test, pch=16, col=factor(Site))
+# modfit <- summary(lmer(perc_maxBAI~Al_As.resid + (1|Site), test))
+# abline(a=modfit$coefficients[1,1], b=modfit$coefficients[2,1], lwd=2, lty=1)
+# palette(mypal)
+# for (i in unique(test$Site[which(test$Al_As.resid>0 & test$perc_maxBAI>0)])){
+#   tmp <- test %>% filter(Site==i) %>% arrange(Al_As.resid)
+#   fitted <- predict(lm(perc_maxBAI~Al_As.resid, tmp),newdata=data.frame("Al_As.resid"=c(min(tmp$Al_As.resid, na.rm=T), max(tmp$Al_As.resid, na.rm=T))))
+#   lines(x=c(min(tmp$Al_As.resid, na.rm=T), max(tmp$Al_As.resid, na.rm=T)), y=fitted, col="#55555555", lwd=2)
+# }
+# #points(mLength~mLDMC, wp.site, col=factor(Site), pch=17, cex=site.cex)
+
+
+
+
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+########. FIG S10removed: Sensitivity of NPP to VPD ####################################
+
+
+palette(paste0(mypal,"77"))
+plot(NPP_mean~PD, wp.ind, col=factor(Site), pch=16
+     ,ylab="Simulated NPP (gC/day)"
+     ,xlab= expression(paste("Observed ",Psi[PD]," (MPa)"))
+     , ylim=c(-250,160))
+arrows(y1 = wp.ind$NPP_min, y0=wp.ind$NPP_max, x0=wp.ind$PD, col=factor(wp.ind$Site), length = 0, lwd=1.5)
+abline(h=0, col="darkgray")
+
+points(NPP_mean_lk~PD, wp.ind, col=factor(Site), pch=4)
+
+abline(lm(NPP_mean~PD, wp.ind))
+abline(lm(NPP_min~PD, wp.ind))
+abline(lm(NPP_max~PD, wp.ind))
+
+
+
+
+
+# 
+# # bnew) PLC  based on PDs
+# palette(mypal)
+# plot(I(100-100*K_frac_mean)~PD, wp.ind, col=factor(Site), pch=16
+#      ,xlab=expression(paste("Observed ",Psi[PD]," (MPa)"))
+#      ,ylab= "Simulated PLC (%)" )
+# palette(paste0(mypal,"77"))
+# arrows(y0 = 100 - 100*wp.ind$K_frac_min, y1=100- 100*wp.ind$K_frac_max, x0=wp.ind$PD, col=factor(wp.ind$Site), length = 0, lwd=2)
+# mtext("b)", side=3, line=0, adj=0.05)
+# abline(v=-3.88, col="grey", lty=2)
+# abline(v=-4.47, col="black", lty=2)
+# 
+# points(I(100-100*K_frac_mean_ll)~PD, wp.ind, col=factor(Site), pch=1
+#      ,xlab=expression(paste("Observed ",Psi[MD]," (MPa)"))
+#      ,ylab= "Simulated PLC (%)" )
+
+
+
+
+
+
+
+
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+######. Fig S7removed: PLC ~ MD for Leaf Area comparison #########
+
+
+quartz(width=6, height=3.1)
+par(mfrow=c(1,2),mar=c(3,3.5,1.5,1), mgp=c(2,1,0))
+
+# a) PLC pretty reasonable based on MDs - true leaf area
+palette(mypal)
+plot(PLC_mean~MD, wp.ind, col=factor(Site), pch=16
+     ,xlab=expression(paste("Observed ",Psi[MD]," (MPa)"))
+     ,ylab= "Simulated PLC (%)" 
+     ,ylim= c(0,100))
+palette(paste0(mypal,"77"))
+arrows(y0 = 100 - 100*wp.ind$K_frac_min, y1=100- 100*wp.ind$K_frac_max, x0=wp.ind$MD, col=factor(wp.ind$Site), length = 0, lwd=2)
+mtext("a) High Kmax", side=3, line=0, adj=0.05)
+abline(v=-3.88, col="grey", lty=2)
+abline(v=-4.47, col="black", lty=2)
+#points(PLC_mean_ll~MD, wp.ind, col=factor(Site))
+
+# b) PLC as f(observed MD) Low Leaf Area
+palette(mypal)
+plot(PLC_mean_lk~MD, wp.ind, col=factor(Site), pch=16
+     ,xlab=expression(paste("Observed ",Psi[MD]," (MPa)"))
+     ,ylab= "Simulated PLC (%)" 
+     ,ylim=c(0,100))
+palette(paste0(mypal,"77"))
+arrows(y0 = 100 - 100*wp.ind$K_frac_min_lk, y1=100- 100*wp.ind$K_frac_max_lk, x0=wp.ind$MD, col=factor(wp.ind$Site), length = 0, lwd=2)
+mtext("b) Low Kmax", side=3, line=0, adj=0.05)
+abline(v=-3.88, col="grey", lty=2)
+abline(v=-4.47, col="black", lty=2)
+
+
+if(save.figures==T){quartz.save(file=paste0(results.dir,"/FigS7_HotterSimPrognostic_v3.pdf"),type = "pdf")}
+
+
+
+#+++++++++ Fig S7old: with minVPD when we had runaway effect ++++++++++++++
+#+# ## looking at min VPD
 # quartz(width=6, height=5)
 # par(mfrow=c(2,2), mar=c(3,3,1,1), mgp=c(2,1,0))
 # 
@@ -2023,8 +2168,9 @@ if(save.figures==T){quartz.save(file=paste0(results.dir,"/FigS8_HotterSimsBrGrow
 
 
 
+
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-###. FIG S9: Water potential comparison with low Kmax: ######
+###. FIG S8removed: HOTTER Figs with low Kmax: ######
 
 quartz(width=6, height=5)
 par(mfrow=c(2,2), mar=c(3,3,1,1), mgp=c(2,1,0))
@@ -2133,136 +2279,12 @@ points(mperc_maxBAI~NPP_mean_lk, wp.site
        , pch=17, cex=site.cex)
 mtext("d)", side=3, line=-1, adj=0.05)
 
-if(save.figures==T){quartz.save(file=paste0(results.dir,"/FigS9_HotterSims_lk_v1.pdf"),type = "pdf")}
-
-
-
-
-quartz(width=6, height=5)
-par(mfrow=c(2,2), mar=c(3,3,1,1), mgp=c(2,1,0))
-
-
-# Panel a) Prognostic MD WP
-#palette(mypal)
-palette(paste0(mypal,"55"))
-plot(MD~psi_leaf_mean, wp.ind, col=factor(Site), pch=16
-     ,ylab=expression(paste("Observed ",Psi[MD]," (MPa)"))
-     ,xlab= expression(paste("Simulated ", Psi[MD]," (MPa)" ))
-     ,xlim=c(-6,-0.8), ylim=c(-6,-0.8))
-abline(a=0,b=1)
-#points(MD~psi_leaf_mean, wp.ind, col=factor(Site), pch=16)
-#points(MD~psi_leaf_max, wp.ind, col=factor(Site), pch=2)
-
-palette(paste0(mypal,"55")) #was 77
-arrows(x0 = wp.ind$psi_leaf_min, x1=wp.ind$psi_leaf_max, y0=wp.ind$MD, col=factor(wp.ind$Site), length = 0, lwd=2)
-mtext("a)", side=3, line=-1, adj=0.05)
-palette(mypal)
-points(mMD~psi_leaf_mean, wp.site, col=Site, pch=17, cex=site.cex)
-abline(h=-3.88, col="darkgray", lty=2 )
-abline(v=-3.88, col="darkgray", lty=2)
-text(x=c(-3.88, -1.6), y=c(-5.9,-3.6), "Leaf P50", col="darkgray")
-
-mod <- lmer(MD~psi_leaf_mean + (1|Site), wp.ind)
-modfit <- summary(mod)
-#modfit <- summary(lmer(perc_maxBAI~mAl_As + (1|Site), wp.ind))
-modlm <- lm(mMD~psi_leaf_mean, wp.site)
-modfitlm <- summary(modlm)
-mtext(expr(paste(R[marg]^2
-                 , "=" 
-                 , !!round(r.squaredGLMM(mod)[[1]],2)
-                 , ",   RMSE="
-                 , !!round(sqrt(mean(resid(lmer(MD~psi_leaf_mean + (1|Site), wp.ind))^2)),2)))
-      , side=3, line=-2, cex=0.7, col="darkgray",adj=.4)
-mtext(expr(paste(R^2
-                 , "=" 
-                 , !!round(modfitlm$r.squared,2)
-                 , ",   RMSE="
-                 , !!round(sqrt(mean(resid(lm(mMD~psi_leaf_mean, wp.site))^2)),2) )),
-      , side=3, line=-1.1, cex=0.7, adj=.5)
-
-
-# calculating  RMSE
-sqrt(mean(resid(lmer(MD~psi_leaf_mean + (1|Site), wp.ind))^2)) # 0.33 MPa
-sqrt(mean(resid(lm(MD~psi_leaf_mean, wp.ind))^2)) # 0.46 MPa
-sqrt(mean(resid(lm(mMD~psi_leaf_mean, wp.site))^2)) # 0.30 MPa
-
-
-# Panel b) PLC not related to growth
-palette(paste0(mypal,"77"))
-plot(perc_maxBAI~PLC_mean, wp.ind, col=factor(Site), pch=16
-     ,ylab="Observed BAI Growth (% of max)"
-     ,xlab= "Simulated PLC (%)" )
-# for (i in unique(wp.ind$Site[which(wp.ind$PLC_mean>0 & wp.ind$perc_maxBAI>0)])){
-#   tmp <- wp.ind %>% filter(Site==i) %>% arrange(GPP_mean)
-#   fitted <- predict(lm(perc_maxBAI~PLC_mean, tmp),newdata=data.frame("PLC_mean"=c(min(tmp$PLC_mean, na.rm=T), max(tmp$PLC_mean, na.rm=T))))
-#   lines(x=c(min(tmp$PLC_mean, na.rm=T), max(tmp$PLC_mean, na.rm=T)), y=fitted, col="#55555555", lwd=2)
-# }
-palette(mypal)
-points(mperc_maxBAI~PLC_mean, wp.site
-       , col=ifelse(summary(lm(mperc_maxBAI~PLC_mean, wp.site))$coefficients[2,4]>0.05,"black",factor(Site))
-       , pch=17, cex=site.cex)
-#arrows(x0 = 100 - 100*wp.ind$K_frac_min, x1=100- 100*wp.ind$K_frac_max, y0=wp.ind$perc_maxBAI, col=factor(wp.ind$Site), length = 0, lwd=2)
-mtext("b)", side=3, line=-1, adj=0.05)
-
-# Panel c) GPP negatively related to growth
-palette(paste0(mypal,"77"))
-plot(perc_maxBAI~GPP_mean, wp.ind, col=factor(Site), pch=16
-     ,ylab="Observed BAI Growth (% of max)"
-     ,xlab= "Simulated GPP (gC/day)" )
-mod <- lmer(perc_maxBAI~GPP_mean + (1|Site), wp.ind)
-modfit <- summary(mod)
-mtext(expr(paste("p=", !!round(modfit$coefficients[2,5],3),", ", R[marg]^2, "=" , !!round(r.squaredGLMM(mod)[[1]],2))), side=3, line=-1.2, adj=.75, cex=0.7, col="darkgray")
-#abline(a=modfit$coefficients[1,1], b=modfit$coefficients[2,1], lwd=2, lty=2)
-for (i in unique(wp.ind$Site[which(wp.ind$GPP_mean>0 & wp.ind$perc_maxBAI>0)])){
-  tmp <- wp.ind %>% filter(Site==i) %>% arrange(GPP_mean)
-  fitted <- predict(mod,newdata=data.frame("GPP_mean"=c(min(tmp$GPP_mean, na.rm=T), max(tmp$GPP_mean, na.rm=T)), "Site"=rep(i,2)))
-  lines(x=c(min(tmp$GPP_mean, na.rm=T), max(tmp$GPP_mean, na.rm=T)), y=fitted, col="#55555555", lwd=2, lty=1)
-}
-palette(mypal)
-points(mperc_maxBAI~GPP_mean, wp.site
-       , col=ifelse(summary(lm(mperc_maxBAI~GPP_mean, wp.site))$coefficients[2,4]>0.05,"black",factor(Site))
-       , pch=17, cex=site.cex)
-mtext("c)", side=3, line=-1, adj=0.05)
-
-# Panel d) NPP negative, but positively related to growth
-palette(paste0(mypal,"77"))
-plot(perc_maxBAI~NPP_mean, wp.ind, col=factor(Site), pch=16
-     ,ylab="Observed BAI Growth (% of max)"
-     ,xlab= "Simulated NPP (gC/day)" )
-mod <- lmer(perc_maxBAI~NPP_min + (1|Site), wp.ind)
-modfit <- summary(mod)
-# mtext(expr(paste("p=", !!round(modfit$coefficients[2,5],2),", ", R[marg]^2, "=" , !!round(r.squaredGLMM(mod)[[1]],2))), side=3, line=-1.2, adj=.25, cex=0.7, col="darkgray")
-#abline(a=modfit$coefficients[1,1], b=modfit$coefficients[2,1], lwd=2, lty=1)
-# for (i in unique(wp.ind$Site[which(wp.ind$NPP_mean<0 & wp.ind$perc_maxBAI>0)])){
-#   tmp <- wp.ind %>% filter(Site==i) %>% arrange(NPP_mean)
-#   fitted <- predict(mod,newdata=data.frame("NPP_mean"=c(min(tmp$NPP_mean, na.rm=T), max(tmp$NPP_mean, na.rm=T)), "Site"=rep(i,2)))
-#   lines(x=c(min(tmp$NPP_mean, na.rm=T), max(tmp$NPP_mean, na.rm=T)), y=fitted, col="#55555555", lwd=2)
-# }
-palette(mypal)
-
-points(mperc_maxBAI~NPP_mean, wp.site
-       , col=ifelse(summary(lm(mperc_maxBAI~NPP_mean, wp.site))$coefficients[2,4]>0.05,"black",factor(Site))
-       , pch=17, cex=site.cex)
-mtext("d)", side=3, line=-1, adj=0.05)
+if(save.figures==T){quartz.save(file=paste0(results.dir,"/FigS8_HotterSims_lk_v1.pdf"),type = "pdf")}
 
 
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-#####. FIG S10: Dual Isotope Plot ####################
-
-quartz(width=4, height=4)
-palette(mypal)
-par(mgp=c(2.5,1,0))
-plot(delD~del18O, wp.ind, col=Site, pch=16,
-     ylab= expression(paste(delta*D[xylem]," (\u2030)")),
-     xlab= expression(paste(delta^18 *O[xylem]," (\u2030)")))
-abline(a=10, b=8)
-
-if(save.figures==T){quartz.save(file=paste0(results.dir,"/FigS9_DualIsoPlot_v1.pdf"),type = "pdf")}
-
-
-#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-#####. FIG S11: LA comparison on NPP and PLC ####################
+#####. FIG S9removed: LA comparison on NPP and PLC ####################
 quartz(width=6, height=3.1)
 par(mfrow=c(1,2),mar=c(3,3.5,1.5,1), mgp=c(2,1,0))
 
@@ -2297,95 +2319,7 @@ for (i in unique(wp.ind$Site[which(wp.ind$NPP_mean<0 & wp.ind$al_true>0)])){
 
 
 
-if(save.figures==T){quartz.save(file=paste0(results.dir,"/FigS11_HotterSim_LeafAreaSensitivity_v1.pdf"),type = "pdf")}
-
-
-##### Overshoot Figure with VPD #######3
-quartz(width=7, height=3)
-par(mfrow=c(1,3), mar=c(3,3,1,1), mgp=c(2,1,0), cex=1)
-
-# a) Max VPD
-palette(paste0(mypal,"99"))
-plot(NPP_max~al_true, wp.ind, col=factor(Site), pch=16
-     , ylab="Simulated NPP (gC/day)"
-     , xlab="Upscaled Tree Leaf Area (m2)", ylim=c(-250,175)
-)
-points(NPP_max~al_true, wp.ind[which(wp.ind$NPP_max<0),])
-abline(a=1,b=0, col="darkgray")
-mtext("a) Max VPD", side=3, line=0.1, adj=-0.1)
-# fit lm
-modlm <- lm(NPP_max~al_true, wp.ind[which(wp.ind$NPP_max<0),])
-modfitlm <- summary(modlm)
-abline(a=modfitlm$coefficients[1,1], b=modfitlm$coefficients[2,1], lwd=2, lty=1)
-mtext(expr(paste("p=", !!round(modfitlm$coefficients[2,4],2),", ", R^2, "=" , !!round(modfitlm$r.squared,2))), side=3, line=-1.1, cex=0.7, adj=.9)
-
-
-# Panel b) mean VPD
-plot(NPP_mean~al_true, wp.ind, col=factor(Site), pch=16
-     , ylab="Simulated NPP (gC/day)"
-     , xlab="Upscaled Tree Leaf Area (m2)"
-     , ylim=c(-250,175)
-     )
-points(NPP_mean~al_true, wp.ind[which(wp.ind$NPP_mean<0),])
-abline(a=1,b=0, col="darkgray")
-mtext("b) Mean VPD", side=3, line=0.1, adj=-0.1)
-# fit lm
-modlm <- lm(NPP_mean~al_true, wp.ind[which(wp.ind$NPP_mean<0),])
-modfitlm <- summary(modlm)
-abline(a=modfitlm$coefficients[1,1], b=modfitlm$coefficients[2,1], lwd=2, lty=1)
-mtext(expr(paste("p=", !!round(modfitlm$coefficients[2,4],2),", ", R^2, "=" , !!round(modfitlm$r.squared,2))), side=3, line=-1.1, cex=0.7, adj=.9)
-
-
-# Panel c) min VPD
-plot(NPP_min~al_true, wp.ind, col=factor(Site), pch=16
-     , ylab="Simulated NPP (gC/day)"
-     , xlab="Upscaled Tree Leaf Area (m2)"
-     , ylim=c(-250,175)
-)
-points(NPP_min~al_true, wp.ind[which(wp.ind$NPP_min<0),])
-abline(a=1,b=0)
-
-mtext("c) Min VPD", side=3, line=0.1, adj=-0.1)
-# fit lm
-modlm <- lm(NPP_min~al_true, wp.ind[which(wp.ind$NPP_min>0),])
-modfitlm <- summary(modlm)
-abline(a=modfitlm$coefficients[1,1], b=modfitlm$coefficients[2,1], lwd=2, lty=2)
-mtext(expr(paste("p=", !!round(modfitlm$coefficients[2,4],2),", ", R^2, "=" , !!round(modfitlm$r.squared,2))), side=1, line=-1.1, cex=0.7, adj=.9)
-
-if(save.figures==T){quartz.save(file=paste0(results.dir,"/FigSYY_HotterSim_LeafAreaSensitivity_v1.pdf"),type = "pdf")}
-
-
-#++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-########. FIG S__: Sensitivity of NPP to VPD ####################################
-
-
-palette(paste0(mypal,"77"))
-plot(NPP_mean~PD, wp.ind, col=factor(Site), pch=16
-     ,ylab="Simulated NPP (gC/day)"
-     ,xlab= expression(paste("Observed ",Psi[PD]," (MPa)"))
-     , ylim=c(-250,160))
-arrows(y1 = wp.ind$NPP_min, y0=wp.ind$NPP_max, x0=wp.ind$PD, col=factor(wp.ind$Site), length = 0, lwd=1.5)
-abline(h=0, col="darkgray")
-
-points(NPP_mean_lk~PD, wp.ind, col=factor(Site), pch=4)
-
-abline(lm(NPP_mean~PD, wp.ind))
-abline(lm(NPP_min~PD, wp.ind))
-abline(lm(NPP_max~PD, wp.ind))
-#++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-########. FIG S12: Controls on Al_As ####################################
-
-quartz(width=3.5, height=3.5)
-ggplot(branch.traits, aes(x=log(leafsize), y=log(Al_As), col=log(Length))) + geom_point() + theme_classic()
-
-if(save.figures==T){quartz.save(file=paste0(results.dir,"/FigS12_AlAs_lengthleafsize_v1.pdf"),type = "pdf")}
-
-
-mod <- lmer(log(Al_As)~log(leafsize)+log(Length)+(1|pop/tree), branch.traits)
-summary(mod)
-r.squaredGLMM(mod) # Marginal R2 = 0.19
-
-
+if(save.figures==T){quartz.save(file=paste0(results.dir,"/FigS9_HotterSim_LeafAreaSensitivity_v1.pdf"),type = "pdf")}
 
 
 
