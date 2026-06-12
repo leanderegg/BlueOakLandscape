@@ -5,8 +5,6 @@
 ##      stress from climate and growth in a xeric oak"
 ######################################################
 
-# This version was the full version cut down to include only the
-# relevant code for the published Github repo as of 2026.05.15 or so.
 
 #load packages
 library(RColorBrewer)
@@ -75,7 +73,7 @@ if(save.figures == T) { dir.create(results.dir)}
 # Abatzoglou JT, Dobrowski SZ, Parks SA, Hegewisch KC. 2018. TerraClimate, a high-resolution global dataset of monthly climate and climatic water balance from 1958–2015. Scientific Data 5: 170191.
 
 pop.terraclim <- read.csv("DerivedData/Population_TerraClimate_230512.csv")[,-1]
-  # only 15 sites + dropped site from spring (lost access because of pot growers)
+  # only 15 sites + dropped site from spring (lost access because of illicit pot growers)
 
 #______________________________________________________________________
 #######   * Soils data ###################################################
@@ -167,7 +165,7 @@ qudo <- read.csv("DerivedData/CA_QUDO_herbariumspecimens_wTerraClimatev240216.cs
 #______________________________________________________________________
 
 # individual average data, from ~3 measurements per individual for traits and 3-8 measurements for water potentials
-wp.ind <- read.csv("DerivedData/Qdouglasii_Fall18_WP_traits_growth_isos_260401.csv", row.names = 1)
+wp.ind <- read.csv("DerivedData/Qdouglasii_Fall18_IndAvg_WP_traits_growth_isos_260401.csv", row.names = 1)
 # create log10-transformed variables for things that appear really right skewed
 wp.ind$logAl_As <- log(wp.ind$mAl_As, base=10)
 wp.ind$logml_ms <- log(wp.ind$mml_ms, base=10)
@@ -185,6 +183,7 @@ wp.ind$del18O.resid[which(wp.ind$del18O<0)] <- resid(lm(del18O~wydel18O, wp.ind)
 # make percent of max 5yr BAI into percent rather than ratio
 wp.ind$perc_maxBAI <- wp.ind$perc_maxBAI*100
 
+# add in soils data
 soil.simple <- soils %>% filter(ChoiceOrder==1) %>% select(tree_correct, site_correct, parent.material.ssurgo = parent.material, soil.name, water.storage100cm = available.water.storage..0.100cm., PAW=total.plant.available.water.cm., bedrock.depth=min.bedrock.depth..cm..if.available )
 soil.simple$bedrock.depth[which(soil.simple$bedrock.depth=="na")] <- NA
 soil.simple$PAW[which(soil.simple$PAW=="na")] <- NA
@@ -214,30 +213,21 @@ wp.ind$HSM_stem <- (.93*wp.ind$MD) + 4.47# reduce leaf wp by 7% to estimate bran
 
 forcings <- read.csv("DerivedData/HotterSimulations_260128/met_blueOaks_clean.csv")
 maxvpd <- read.csv("DerivedData/HotterSimulations_260128/hotter_demo_output_maxVPD_stdAl_kmax88k.csv")[,-1]
-maxvpd.lowk <- read.csv("DerivedData/HotterSimulations_260128/hotter_demo_output_maxVPD_stdAl_kmax42k.csv")[,-1]
 meanvpd <- read.csv("DerivedData/HotterSimulations_260128/hotter_demo_output_meanVPD_stdAl_kmax88k.csv")[,-1]
-meanvpd.lowk <- read.csv("DerivedData/HotterSimulations_260128/hotter_demo_output_meanVPD_stdAl_kmax42k.csv")[,-1]
 minvpd <- read.csv("DerivedData/HotterSimulations_260128/hotter_demo_output_minVPD_stdAl_kmax88k.csv")[,-1]
-minvpd.lowk <- read.csv("DerivedData/HotterSimulations_260128/hotter_demo_output_minVPD_stdAl_kmax42k.csv")[,-1]
 colnames(maxvpd)[1:6] <- paste(colnames(maxvpd)[1:6], "max", sep="_")
 colnames(meanvpd)[1:6] <- paste(colnames(meanvpd)[1:6], "mean", sep="_")
 colnames(minvpd)[1:6] <- paste(colnames(minvpd)[1:6], "min", sep="_")
-colnames(maxvpd.lowk)[1:6] <- paste(colnames(maxvpd.lowk)[1:6], "max","lk", sep="_")
-colnames(meanvpd.lowk)[1:6] <- paste(colnames(meanvpd.lowk)[1:6], "mean","lk", sep="_")
-colnames(minvpd.lowk)[1:6] <- paste(colnames(minvpd.lowk)[1:6], "min","lk", sep="_")
 
 
 # combine all the HOTTER Simulation outputs into one dataframe
-hotsim <- full_join(full_join(full_join(full_join(full_join(full_join(forcings, maxvpd), meanvpd), minvpd),maxvpd.lowk),meanvpd.lowk),minvpd.lowk)
+hotsim <- full_join(full_join(full_join(forcings, maxvpd), meanvpd), minvpd)
 
 # join them with the indivdiual level observations
 wp.ind <- full_join(wp.ind, hotsim[,-4]) # gotta keep mAl_As from screwing me with rounding error in hotsim
 wp.ind$PLC_mean <- 100 - 100*wp.ind$K_frac_mean # calculate PLC from the K remaining, for plotting
-wp.ind$PLC_mean_lk <- 100 - 100*wp.ind$K_frac_mean_lk # calculate PLC from the K remaining, for plotting
 wp.ind$PLC_max <- 100 - 100*wp.ind$K_frac_max # calculate PLC from the K remaining, for plotting
-wp.ind$PLC_max_lk <- 100 - 100*wp.ind$K_frac_max_lk # calculate PLC from the K remaining, for plotting
 wp.ind$PLC_min <- 100 - 100*wp.ind$K_frac_min # calculate PLC from the K remaining, for plotting
-wp.ind$PLC_min_lk <- 100 - 100*wp.ind$K_frac_min_lk # calculate PLC from the K remaining, for plotting
 
 
 
@@ -269,10 +259,9 @@ wp.site <- wp.ind %>% group_by(Site, SiteName,Lat.dd, Lon.dd,
             sdmLength = sd(mLength, na.rm=T), semLength = se(mLength), mLength=mean(mLength, na.rm=T),
             mgrowth5yr = mean(growth5yr, na.rm=T), mBAI5yr = mean(BAI, na.rm=T), mperc_maxBAI=mean(perc_maxBAI, na.rm=T), seperc_maxBAI=se(perc_maxBAI), mHeight=mean(Height, na.rm=T), mDBH=mean(DBH, na.rm=T),
             NPP_mean = mean(NPP_mean, na.rm=T),GPP_mean = mean(GPP_mean, na.rm=T), K_frac_mean = mean(K_frac_mean, na.rm=T),psi_leaf_mean = mean(psi_leaf_mean, na.rm=T), psi_leaf_min = mean(psi_leaf_min, na.rm=T), PLC_mean=mean(PLC_mean, na.rm=T),
-            NPP_mean_lk = mean(NPP_mean_lk, na.rm=T),GPP_mean_lk = mean(GPP_mean_lk, na.rm=T), K_frac_mean_lk = mean(K_frac_mean_lk, na.rm=T),psi_leaf_mean_lk = mean(psi_leaf_mean_lk, na.rm=T), psi_leaf_min = mean(psi_leaf_min, na.rm=T), PLC_mean_lk=mean(PLC_mean_lk, na.rm=T)
-            ,PLC_max=mean(PLC_max, na.rm=T), PLC_max_lk=mean(PLC_max_lk, na.rm=T), PLC_min=mean(PLC_min, na.rm=T), PLC_min_lk=mean(PLC_min_lk, na.rm=T)
-            , GPP_max=mean(GPP_max, na.rm=T), GPP_max_lk=mean(GPP_max_lk, na.rm=T), GPP_min=mean(GPP_min, na.rm=T), GPP_min_lk=mean(GPP_min_lk, na.rm=T)
-            ,NPP_max=mean(NPP_max, na.rm=T), NPP_max_lk=mean(NPP_max_lk, na.rm=T), NPP_min=mean(NPP_min, na.rm=T), NPP_min_lk=mean(NPP_min_lk, na.rm=T))
+            ,PLC_max=mean(PLC_max, na.rm=T), PLC_min=mean(PLC_min, na.rm=T)
+            , GPP_max=mean(GPP_max, na.rm=T), GPP_min=mean(GPP_min, na.rm=T)
+            ,NPP_max=mean(NPP_max, na.rm=T), NPP_min=mean(NPP_min, na.rm=T))
 
 
 
@@ -281,7 +270,7 @@ wp.site$logLength <- log(wp.site$mLength, base=10)
 # write out wp.ind dataset
 #write.csv(wp.ind, "DerivedData/Wild_individualaverage_alltraits_20240515.csv")
 ### Also load in the branch level data for many of these traits for some analyses
-branch.traits <- read.csv("DerivedData/FallWild_Leaftraits_branch_240508.csv")
+branch.traits <- read.csv("DerivedData/Qdouglasii_Fall18_BranchLevel_Traits_240508.csv")
 
 #______________________________________________________________________
 #######   * Gas Exchange Data ###################################################
@@ -915,7 +904,7 @@ mtext(expr(paste("p=", !!round(modfit$coefficients[2,5],2),", ", R[marg]^2, "=" 
 plot(mml_ms~tc.tmin.2018wy, wp.ind, pch=16, col=tree.col
      , ylab=expression(paste(Mass[leaf]:Mass[stem]), log="y")
      , xlab="2018 Min Temp (°C)")
-mod <- lmer(logml_ms~tc.tmin.2018wy + (1|Site), wp.ind)
+mod <- lmer(mml_ms~tc.tmin.2018wy + (1|Site), wp.ind)
 modfit <- summary(mod)
 abline(a=modfit$coefficients[1,1], b=modfit$coefficients[2,1], lwd=2, lty=1)
 points(mml_ms~tc.tmin.2018wy, wp.site, pch=16, cex=site.cex)
@@ -1366,7 +1355,7 @@ mtext("b)", side=3, line=-1, adj=0.05)
 
 # Panel c) GPP negatively related to growth
 palette(paste0(mypal,"77"))
-plot(perc_maxBAI~GPP_mean, wp.ind, col=factor(Site), pch=16
+plot(perc_maxBAI~GPP_mean_alst, wp.ind, col=factor(Site), pch=16
      ,ylab="Observed BAI Growth (% of max)"
      ,xlab= "Simulated GPP (gC/day)" )
 # arrows(x0 = wp.ind$GPP_min, x1=wp.ind$GPP_max, y0=wp.ind$perc_maxBAI, col=factor(wp.ind$Site), length = 0, lwd=2)
@@ -1394,7 +1383,7 @@ plot(perc_maxBAI~NPP_mean, wp.ind, col=factor(Site), pch=16
      ,xlab= "Simulated NPP (gC/day)" )
 #arrows(x0 = wp.ind$NPP_min, x1=wp.ind$NPP_max, y0=wp.ind$perc_maxBAI, col=factor(wp.ind$Site), length = 0, lwd=2)
 
-mod <- lmer(perc_maxBAI~NPP_min + (1|Site), wp.ind)
+mod <- lmer(perc_maxBAI~NPP_mean + (1|Site), wp.ind)
 modfit <- summary(mod)
 # mtext(expr(paste("p=", !!round(modfit$coefficients[2,5],2),", ", R[marg]^2, "=" , !!round(r.squaredGLMM(mod)[[1]],2))), side=3, line=-1.2, adj=.25, cex=0.7, col="darkgray")
 #abline(a=modfit$coefficients[1,1], b=modfit$coefficients[2,1], lwd=2, lty=1)
@@ -1848,8 +1837,9 @@ plot(1~1, type=NA)
 # Panel b) PLC not related to growth
 palette(paste0(mypal,"77"))
 plot(logLength~PLC_mean, wp.ind, col=factor(Site), pch=16
-     ,ylab="Observed BAI Growth (% of max)"
-     ,xlab= "Simulated PLC (%)" )
+     ,ylab="Observed 1yr Branch Growth (cm)"
+     ,xlab= "Simulated PLC (%)" , yaxt="n")
+axis(2, at = log10(c(2,5,10,15,20)), labels = c(2,5,10,15,20))
 # for (i in unique(wp.ind$Site[which(wp.ind$PLC_mean>0 & wp.ind$logLength>0)])){
 #   tmp <- wp.ind %>% filter(Site==i) %>% arrange(GPP_mean)
 #   fitted <- predict(lm(logLength~PLC_mean, tmp),newdata=data.frame("PLC_mean"=c(min(tmp$PLC_mean, na.rm=T), max(tmp$PLC_mean, na.rm=T))))
@@ -1867,8 +1857,10 @@ mtext("a)", side=3, line=-1, adj=0.05)
 # Panel c) GPP negatively related to growth
 palette(paste0(mypal,"77"))
 plot(logLength~GPP_mean, wp.ind, col=factor(Site), pch=16
-     ,ylab="Observed BAI Growth (% of max)"
-     ,xlab= "Simulated GPP (gC/day)" )
+     ,ylab="Observed 1yr Branch Growth (cm)"
+     ,xlab= "Simulated GPP (gC/day)", yaxt="n" )
+axis(2, at = log10(c(2,5,10,15,20)), labels = c(2,5,10,15,20))
+
 mod <- lmer(logLength~GPP_mean + (1|Site), wp.ind)
 modfit <- summary(mod)
 summary(lm(logLength~GPP_mean, wp.site))
@@ -1888,8 +1880,10 @@ mtext("b)", side=3, line=-1, adj=0.05)
 # Panel d) NPP negative, but positively related to growth
 palette(paste0(mypal,"77"))
 plot(logLength~NPP_mean, wp.ind, col=factor(Site), pch=16
-     ,ylab="Observed BAI Growth (% of max)"
-     ,xlab= "Simulated NPP (gC/day)" )
+     ,ylab="Observed 1yr Branch Growth (cm)"
+     ,xlab= "Simulated NPP (gC/day)", yaxt="n" )
+axis(2, at = log10(c(2,5,10,15,20)), labels = c(2,5,10,15,20))
+
 mod <- lmer(logLength~NPP_mean + (1|Site), wp.ind)
 modfit <- summary(mod)
 # mtext(expr(paste("p=", !!round(modfit$coefficients[2,5],2),", ", R[marg]^2, "=" , !!round(r.squaredGLMM(mod)[[1]],2))), side=3, line=-1.2, adj=.25, cex=0.7, col="darkgray")
