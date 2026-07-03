@@ -72,7 +72,7 @@ if(save.figures == T) { dir.create(results.dir)}
 # https://www.climatologylab.org/terraclimate.html
 # Abatzoglou JT, Dobrowski SZ, Parks SA, Hegewisch KC. 2018. TerraClimate, a high-resolution global dataset of monthly climate and climatic water balance from 1958–2015. Scientific Data 5: 170191.
 
-pop.terraclim <- read.csv("DerivedData/Population_TerraClimate_230512.csv")[,-1]
+pop.terraclim <- read.csv("ZenodoDataVersion/Population_TerraClimate_230512.csv")[,-1]
   # only 15 sites + dropped site from spring (lost access because of illicit pot growers)
 
 #______________________________________________________________________
@@ -80,7 +80,7 @@ pop.terraclim <- read.csv("DerivedData/Population_TerraClimate_230512.csv")[,-1]
 #______________________________________________________________________
 # Extracted using SoilWeb (NRCS) SSURGO
 # https://websoilsurvey.nrcs.usda.gov/app/
-soils <- read.csv("DerivedData/Soil_data_SSURGOv1 _revisednames.csv")
+soils <- read.csv("ZenodoDataVersion/Soil_data_SSURGOv1 _revisednames.csv")
 
 
 
@@ -153,11 +153,11 @@ soils <- read.csv("DerivedData/Soil_data_SSURGOv1 _revisednames.csv")
 # qudo$vpd_gs <- extract(tcn_an$vpd_gs, data.frame(qudo$longitude,qudo$latitude))[,2]
 
 # in case need data offline
-#write.csv(qudo, paste("DerivedData/CA_QUDO_herbariumspecimens_wTerraClimate", results.version,".csv", sep=""))
+#write.csv(qudo, paste("ZenodoDataVersion/CA_QUDO_herbariumspecimens_wTerraClimate", results.version,".csv", sep=""))
 #_______________________
 
 # NOT included in Zenodo repo for this paper, because just a subset of https://dx.doi.org/10.6078/D16K5W
-qudo <- read.csv("DerivedData/CA_QUDO_herbariumspecimens_wTerraClimatev240216.csv")
+qudo <- read.csv("ZenodoDataVersion/CA_QUDO_herbariumspecimens_wTerraClimatev240216.csv")
 
 
 #______________________________________________________________________
@@ -165,7 +165,7 @@ qudo <- read.csv("DerivedData/CA_QUDO_herbariumspecimens_wTerraClimatev240216.cs
 #______________________________________________________________________
 
 # individual average data, from ~3 measurements per individual for traits and 3-8 measurements for water potentials
-wp.ind <- read.csv("DerivedData/Qdouglasii_Fall18_IndAvg_WP_traits_growth_isos_260401.csv", row.names = 1)
+wp.ind <- read.csv("ZenodoDataVersion/Qdouglasii_Fall18_IndAvg_WP_traits_growth_isos_260401.csv", row.names = 1)
 # create log10-transformed variables for things that appear really right skewed
 wp.ind$logAl_As <- log(wp.ind$mAl_As, base=10)
 wp.ind$logml_ms <- log(wp.ind$mml_ms, base=10)
@@ -211,10 +211,10 @@ wp.ind$HSM_stem <- (.93*wp.ind$MD) + 4.47# reduce leaf wp by 7% to estimate bran
 #######   * Hotter Simulations ###################################################
 #______________________________________________________________________
 
-forcings <- read.csv("DerivedData/HotterSimulations_260128/met_blueOaks_clean.csv")
-maxvpd <- read.csv("DerivedData/HotterSimulations_260128/hotter_demo_output_maxVPD_stdAl_kmax88k.csv")[,-1]
-meanvpd <- read.csv("DerivedData/HotterSimulations_260128/hotter_demo_output_meanVPD_stdAl_kmax88k.csv")[,-1]
-minvpd <- read.csv("DerivedData/HotterSimulations_260128/hotter_demo_output_minVPD_stdAl_kmax88k.csv")[,-1]
+forcings <- read.csv("ZenodoDataVersion/HotterSimulations_260128/met_blueOaks_clean.csv")
+maxvpd <- read.csv("ZenodoDataVersion/HotterSimulations_260128/hotter_demo_output_maxVPD_stdAl_kmax88k.csv")[,-1]
+meanvpd <- read.csv("ZenodoDataVersion/HotterSimulations_260128/hotter_demo_output_meanVPD_stdAl_kmax88k.csv")[,-1]
+minvpd <- read.csv("ZenodoDataVersion/HotterSimulations_260128/hotter_demo_output_minVPD_stdAl_kmax88k.csv")[,-1]
 colnames(maxvpd)[1:6] <- paste(colnames(maxvpd)[1:6], "max", sep="_")
 colnames(meanvpd)[1:6] <- paste(colnames(meanvpd)[1:6], "mean", sep="_")
 colnames(minvpd)[1:6] <- paste(colnames(minvpd)[1:6], "min", sep="_")
@@ -268,18 +268,18 @@ wp.site <- wp.ind %>% group_by(Site, SiteName,Lat.dd, Lon.dd,
 wp.site$logLength <- log(wp.site$mLength, base=10)
 
 # write out wp.ind dataset
-#write.csv(wp.ind, "DerivedData/Wild_individualaverage_alltraits_20240515.csv")
+#write.csv(wp.ind, "ZenodoDataVersion/Wild_individualaverage_alltraits_20240515.csv")
 ### Also load in the branch level data for many of these traits for some analyses
-branch.traits <- read.csv("DerivedData/Qdouglasii_Fall18_BranchLevel_Traits_240508.csv")
+branch.traits <- read.csv("ZenodoDataVersion/Qdouglasii_Fall18_BranchLevel_Traits_240508.csv")
 
 #______________________________________________________________________
 #######   * Gas Exchange Data ###################################################
 #______________________________________________________________________
-Midday.gasex <- read.csv("DerivedData/SummaryGasEx_fall2018_20190812.csv")
+Midday.gasex <- read.csv("ZenodoDataVersion/SummaryGasEx_fall2018_20190812.csv")
 
 
 # load in the morning time series from Santa Maria
-smr.ind.clean <- read.csv("DerivedData/SMR_GasEx_MorningTimeSeries.csv", row.names = 1)
+smr.ind.clean <- read.csv("ZenodoDataVersion/SMR_GasEx_MorningTimeSeries.csv", row.names = 1)
 
 
 ###############   END: Load Data ##############################
@@ -1355,7 +1355,7 @@ mtext("b)", side=3, line=-1, adj=0.05)
 
 # Panel c) GPP negatively related to growth
 palette(paste0(mypal,"77"))
-plot(perc_maxBAI~GPP_mean_alst, wp.ind, col=factor(Site), pch=16
+plot(perc_maxBAI~GPP_mean, wp.ind, col=factor(Site), pch=16
      ,ylab="Observed BAI Growth (% of max)"
      ,xlab= "Simulated GPP (gC/day)" )
 # arrows(x0 = wp.ind$GPP_min, x1=wp.ind$GPP_max, y0=wp.ind$perc_maxBAI, col=factor(wp.ind$Site), length = 0, lwd=2)
@@ -1421,7 +1421,7 @@ if(save.figures==T){quartz.save(file=paste0(results.dir,"/Fig8_HotterSims_v5.pdf
 ##### . FIG S1: size-standardizing BAI ###########
 
 # read in BAI and DBH data for all trees:
-wildgrowth <- read.csv("DerivedData/WildGrowth_Oct2018_20230428.csv",row.names=1)
+wildgrowth <- read.csv("ZenodoDataVersion/WildGrowth_Oct2018_20230428.csv",row.names=1)
 # calculate Basal Area Increment from 5yr radial growth and tree DBH
 wildgrowth$BAI_cm2 <- (wildgrowth$DBH_cm/2)^2 * pi - (wildgrowth$DBH_cm/2 - wildgrowth$growth5yr_mm/10)^2 * pi
 # area of whole tree - area of tree 5 years ago
